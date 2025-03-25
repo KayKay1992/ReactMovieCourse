@@ -5,10 +5,18 @@ import './App.css'
 
 
 
-//Lets pass prop from parent component (App) to Child Component (card), you can pass prop of any data type for instance we pass data type of string, number, boolean and object. prop we pass include title, ratings, isCool and aactors
+
 function Card({title, ratings, isCool, actors }) {
   return (
-    <div className="card">
+    //Adding inline styles 
+    //Note inline styles has the preference over other styles should incase it clash with other type of styling.
+    //it is important to stick with one way of styling in todays world tailwind css is gloally used. we will use it later.
+    <div className="card-container" style={{
+      backgroundColor: isCool? 'lightgreen' : 'lightgrey',
+      borderRadius: '10px',
+      padding: '10px',
+      margin: '10px'
+    }}>
       <h2>{title}</h2>
       <p>Rating: {ratings}</p>
       <p>Is this movie cool: {isCool? 'Yes' : 'No'}</p>
