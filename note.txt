@@ -1,75 +1,105 @@
-In React, a component is a building block of the user interface (UI). It is a self-contained, reusable piece of code that defines how a part of the UI should appear and behave. Components can be thought of as the "pieces" that make up the entire application.
+  PROPS
 
-React components allow you to break down complex UIs into smaller, manageable pieces that can be reused, maintained, and tested independently.
+Apart from passing and using components many places we can use prop to pass data
 
-Types of Components in React
-Functional Components:
+In React, props (short for "properties") are the mechanism by which data is passed from a parent component to a child component. Props allow components to be dynamic and reusable, as the data that determines the behavior or appearance of a component can be customized when it is used.
 
-These are simple JavaScript functions that return JSX (JavaScript XML), which defines how the UI should look.
+Key Points about Props:
+Read-Only: Props are immutable inside the component that receives them. This means a component cannot change its own props; they are passed down from the parent and should be treated as read-only values.
 
-They are the modern, preferred way to write components in React, especially with the introduction of React Hooks in React 16.8.
+Data Flow: Props allow data to flow downward from a parent component to its child components. This is often called "one-way data flow" because the data only flows in one direction—from parent to child.
 
-Example: import React from 'react';
+Customization: By passing different values via props, you can customize the behavior or content of child components, making them reusable in different contexts.
 
+How Props Work
+Here’s an example to explain how props are passed and used in React:
+
+Example 1: Passing Props
+jsx
+Copy
+import React from 'react';
+
+// Child Component: Welcome
 function Welcome(props) {
   return <h1>Hello, {props.name}!</h1>;
 }
 
-export default Welcome;
-
-2 Class Components:
-
-These components are ES6 classes that extend React.Component. They can have internal state and lifecycle methods.
-
-While functional components are now preferred, class components are still widely used in legacy codebases.
-
-Example of a class component
-import React, { Component } from 'react';
-
-class Welcome extends Component {
-  render() {
-    return <h1>Hello, {this.props.name}!</h1>;
-  }
-}
-
-export default Welcome;
-
-Here, Welcome is a class component. It uses this.props to access properties passed to it and renders a greeting message. In class components, the render method is required to output JSX.
-
-Why Use Components?
-Reusability: Components can be reused across different parts of the application. For example, a Button component can be reused wherever a button is needed.
-
-Encapsulation: Each component is self-contained, meaning it manages its own state, behavior, and rendering logic.
-
-Maintainability: Smaller, focused components are easier to maintain, test, and debug compared to large monolithic code blocks.
-
-Composition: Components can be nested inside other components, allowing complex UIs to be built from simple building blocks.
-
-Example: Building a Simple Component
-
-import React, { useState } from 'react';
-
-// A simple Button component
-function Button({ label, onClick }) {
-  return <button onClick={onClick}>{label}</button>;
-}
-
-// Main App component
+// Parent Component: App
 function App() {
-  const [count, setCount] = useState(0);
+  return <Welcome name="Alice" />;
+}
 
-  const increment = () => setCount(count + 1);
+export default App;
+In this example, the App component is the parent component, and it passes a prop named name with the value "Alice" to the Welcome child component.
 
+The Welcome component receives the name prop and uses it to render the message "Hello, Alice!".
+
+The props object contains all the properties (i.e., data) passed to the component, and you access the specific prop like props.name.
+
+Example 2: Using Multiple Props
+jsx
+Copy
+import React from 'react';
+
+// Child Component: UserProfile
+function UserProfile(props) {
   return (
     <div>
-      <h1>Counter: {count}</h1>
-      <Button label="Increment" onClick={increment} />
+      <h2>Name: {props.name}</h2>
+      <p>Age: {props.age}</p>
     </div>
   );
 }
 
+// Parent Component: App
+function App() {
+  return <UserProfile name="Bob" age={30} />;
+}
+
 export default App;
+Here, the parent component App passes two props to the UserProfile component: name and age.
 
-App is the parent component, which maintains the count state.
+The UserProfile component receives these props and displays them in the UI.
 
-Button is a child component that receives the label and onClick handler as props, making it reusable.
+Destructuring Props
+In React, you can destructure props to make the code cleaner and more readable. Instead of accessing props like props.name, you can directly extract values from props.
+
+Example of Destructuring Props:
+jsx
+Copy
+import React from 'react';
+
+// Child Component: UserProfile
+function UserProfile({ name, age }) {
+  return (
+    <div>
+      <h2>Name: {name}</h2>
+      <p>Age: {age}</p>
+    </div>
+  );
+}
+
+// Parent Component: App
+function App() {
+  return <UserProfile name="Bob" age={30} />;
+}
+
+export default App;
+In this example, the UserProfile component receives name and age props directly through destructuring in the function parameter.
+
+Props vs. State
+Props are used to pass data downward from a parent to a child component, and they are immutable within the child component.
+
+State, on the other hand, is used to manage data that can change over time and is mutable within the component that owns it.
+
+Summary:
+Props are how data is passed from a parent component to a child component.
+
+Props are read-only, meaning a child component cannot modify its props.
+
+They allow for the customization and reusability of components.
+
+You can use destructuring to extract values from props, define default props and prop types for type safety.
+
+Props are often used to pass static data or configuration, while state is used to manage dynamic data within a component.
+

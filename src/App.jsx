@@ -3,24 +3,16 @@ import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
-//Class Components
-//Not widely used now. 
-// class ClassComponent extends React.Component {
-//   render(){
-//     return (
-//       <div className="card">
-//         <h2>Class Component</h2>
-//         <p>Hello, I am a class component.</p>
-//       </div>
-//     )
-//   }
-// }
 
-//Components are reuseable. lets create a new Component card component and reused it in the app compoenent which is the master component
-function Card() {
+
+//Lets pass prop from parent component (App) to Child Component (card), you can pass prop of any data type for instance we pass data type of string, number, boolean and object. prop we pass include title, ratings, isCool and aactors
+function Card({title, ratings, isCool, actors }) {
   return (
     <div className="card">
-      <h2>My Card component</h2>
+      <h2>{title}</h2>
+      <p>Rating: {ratings}</p>
+      <p>Is this movie cool: {isCool? 'Yes' : 'No'}</p>
+      {/* <p>Actors: {actors.map(actor => actor.name).join(', ')}</p> */}
      
     </div>
   )
@@ -33,10 +25,10 @@ function App() {
 return (
   <div>
   <h2>Functional Component</h2>
-  <Card/>
-  <Card/>
-  <Card/>
-  <Card/>
+  <Card title='Lion king' ratings= {5} isCool= {true} actors={[{name: 'Actors'}]}/>
+  <Card title='Ijeoma'/>
+  <Card title='Avengers'/>
+  <Card title='Paradox'/>
   </div>
 
 )
