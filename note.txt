@@ -1,0 +1,91 @@
+install vite by running npm create vite@latest
+give it a name or use . to mare make use of root folder.
+use react then javascript and hit enter. the project will be created.
+
+index.html
+Purpose: The main HTML file for your Vite app. This file includes the root HTML structure, and Vite injects the necessary scripts here during development. It typically contains a <div id="app"></div> element where your app will be mounted (if you're using a front-end framework like Vue, React, etc.).
+
+Key Point: Vite uses this file as the entry point for the development server.
+
+ vite.config.js (or vite.config.ts)
+Purpose: This is the Vite configuration file. It contains various settings and configurations related to how Vite should behave when serving and building your app.
+
+Key Point: You can customize things like plugins, build options, and server behavior in this file.
+
+Example: export default {
+  plugins: [/* Your plugins */],
+  build: {
+    outDir: 'dist', // Output directory for build files
+  },
+}
+
+
+src/ directory
+Purpose: The source directory where your app’s main files live.
+
+Files inside src/:
+
+main.js (or main.ts if using TypeScript): The entry point of your JavaScript/TypeScript application. It typically imports components and starts the app.
+
+App.vue (or App.jsx if using React): The main component of your app, depending on the framework you’re using.
+
+assets/ directory (optional): Contains static assets like images, styles, fonts, etc.
+
+package.json
+Purpose: Contains metadata about the project (name, version, etc.) and the project's dependencies and scripts.
+
+Key Point: Vite automatically adds default dependencies like vite, @vitejs/plugin-vue (if using Vue), and a few others, as well as common NPM scripts like dev, build, and serve.
+
+ node_modules/
+Purpose: This folder contains all the npm dependencies your project needs (e.g., Vite, Vue, React, etc.). It is generated when you run npm install or yarn to install your dependencies.
+
+Key Point: You shouldn't modify this folder directly; it's automatically managed by npm or yarn.
+
+public/
+Purpose: The public directory holds assets that should be copied directly to the root of the build output. These assets are not processed by Vite (e.g., image files or static HTML files).
+
+Key Point: Files in this directory are publicly accessible and should be referenced using absolute paths (e.g., /logo.png).
+
+dist/ (only after building)
+Purpose: The build output directory. After running vite build, the bundled files (JavaScript, CSS, images, etc.) will be placed in this directory, ready for deployment to production
+
+8. .gitignore
+Purpose: Specifies which files and directories Git should ignore. Common entries include node_modules, dist, and .env files.
+
+Key Point: Prevents unnecessary files from being committed to your Git repository.
+
+9. README.md
+Purpose: A markdown file that typically contains information about the project, such as how to set up, run, and build the project.
+
+Key Point: It’s helpful for documentation and to give anyone who checks out your project an overview.
+
+10. package-lock.json (or yarn.lock)
+Purpose: This file locks the versions of dependencies installed. It ensures that the same versions are installed for all users of the project.
+
+Key Point: This file should be committed to your repository to maintain consistency
+
+Summary of Key Files:
+index.html – Entry HTML file.
+
+vite.config.js – Configuration file for Vite.
+
+src/ – Contains the source code for your app.
+
+package.json – Project metadata and dependencies.
+
+public/ – Static assets folder.
+
+dist/ – Build output folder (generated after vite build).
+
+README.md – Documentation about the project.
+
+.gitignore – Git ignore file.
+
+node_modules/ – Installed dependencies.
+
+
+TO INSTALL ALL DEPENDENCIES RUN NPM INSTALL.
+THEN START YOUR PROJECT WITH NPM RUN DEV
+
+
+create an account with appwrite later we will connect our react to it. 
