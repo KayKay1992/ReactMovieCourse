@@ -1,50 +1,53 @@
- useReducer
-The useReducer hook is an alternative to useState and is typically used when state logic is complex, such as when the state depends on previous state values or when multiple values are involved.
+useRef
 
-Example:
-To implement the useReducer hook in the code you've provided, we will replace the useState for count and hasLiked with a useReducer hook. This is especially useful if we want to manage multiple related state values with more complex logic, as useReducer is typically used for that purpose.
+To implement the useRef hook in your code, I'll add an example where useRef can be used to reference and interact with DOM elements in the Card component. A common use case for useRef is to access DOM elements directly, such as focusing on an input, measuring the size of an element, or in this case, highlighting the card when it's clicked.
+
+In this modified example, we'll use useRef to highlight the Card component when it's clicked by changing the background color.
+
+Key Changes:
+Using useRef:
+
+I created a reference to the Card DOM element with the line:
+
+jsx
+Copy
+const cardRef = useRef(null);
+This cardRef is used to directly access the DOM node of the Card component.
+
+Attaching the ref to the DOM element:
+
+The ref is passed to the div element representing the card:
+
+jsx
+Copy
+<div ref={cardRef} className={`card-cointainer ${theme}`} onClick={handleCardClick}>
+This allows us to interact with this DOM element via the cardRef.
+
+Handling Card Click to Highlight:
+
+When the card is clicked, the handleCardClick function is triggered. It checks the current background color of the Card and toggles it to lightyellow when clicked, and resets it if it’s already highlighted:
+
+jsx
+Copy
+const handleCardClick = () => {
+  if (cardRef.current) {
+    cardRef.current.style.backgroundColor = cardRef.current.style.backgroundColor === 'lightyellow' ? '' : 'lightyellow';
+  }
+  handleCount();
+};
+What This Does:
+When you click on a Card, the background color will toggle between lightyellow and its original color, highlighting the card.
+
+The useRef hook allows you to interact with the Card's DOM element without needing to use state to store the background color.
+
+Example Use Cases for useRef:
+Managing focus on an input field.
+
+Animating or measuring DOM elements directly.
+
+Avoiding re-renders by accessing DOM elements or mutable values directly.
+
+In this case, useRef is used to directly manipulate the DOM to highlight the card when it's clicked.
 
 
-1. Define the Reducer Function
-The reducer function will manage the state transitions for both count and hasLiked.
 
-2. Dispatch Actions
-Instead of using setCount and setHasLiked, we will dispatch actions to update the state.
-
-explaining the example code
-
-Breakdown of Changes:
-Reducer Function (cardReducer):
-
-The cardReducer function manages two pieces of state: count and hasLiked.
-
-It handles two actions:
-
-increment: Increments the count.
-
-toggleLike: Toggles the hasLiked state between true and false.
-
-useReducer Hook:
-
-The useReducer hook is initialized with the cardReducer and an initial state { count: 0, hasLiked: false }.
-
-dispatch is used to send actions to update the state.
-
-Actions:
-
-Instead of setCount and setHasLiked, we dispatch actions:
-
-dispatch({ type: 'increment' }) is used to increment the count.
-
-dispatch({ type: 'toggleLike' }) is used to toggle the hasLiked state.
-
-Effect Hook (useEffect):
-
-The useEffect hook logs whether the movie was liked or disliked, based on the hasLiked state, and it runs whenever hasLiked or title changes.
-
-Result:
-Each Card component now uses useReducer to manage the state of count and hasLiked.
-
-The logic for incrementing the count and toggling the like state is handled by dispatching actions to the reducer.
-
-The useContext hook still provides the theme value for styling, and the Card components display the current theme.
