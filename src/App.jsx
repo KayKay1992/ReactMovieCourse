@@ -11,9 +11,7 @@ function Card({title, ratings, isCool, actors }) {
     //Adding inline styles 
     //Note inline styles has the preference over other styles should incase it clash with other type of styling.
     //it is important to stick with one way of styling in todays world tailwind css is gloally used. we will use it later.
-    <div className={isCool ? 'cool-background' : 'normal-background card-cointainer' } style={{
-      
-    }}>
+    <div className={isCool ? 'cool-background' : 'normal-background card-cointainer' } >
       <h2>{title}</h2>
       <p>Rating: {ratings}</p>
       <p>Is this movie cool: {isCool? 'Yes' : 'No'}</p>
