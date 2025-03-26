@@ -24,4 +24,14 @@ h2{
   flex-wrap: wrap;
   justify-content: center;
   margin-top: 20px;
+      border-radius: 10px;
+      padding: 10px;
+      margin: 10px;
+}
+.cool-background {
+  background-color: lightgreen;
+}
+
+.normal-background {
+  background-color: lightgrey;
 }
