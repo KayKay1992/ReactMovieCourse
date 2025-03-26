@@ -35,3 +35,11 @@ h2{
 .normal-background {
   background-color: lightgrey;
 }
+button {
+  padding: 10px 20px;
+  border: none;
+  background-color: #4CAF50;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+}
