@@ -1,26 +1,36 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import reactLogo from './assets/react.svg'
 import viteLogo from '/vite.svg'
 import './App.css'
 
 
-//like here if you want to track if someone has like the movie or not you have to use state
+//To explain the useEFFECT lets say you want to log a message each time the user likes a movie for this we use a useEffect.
 
 function Card({title, ratings, isCool, actors }) {
-  const [hasLiked, setHasLiked] = useState(false) 
+
+  const [hasLiked, setHasLiked] = useState(false)
+  //To check the number of count we need to use useState.
+  const [count, setCount] = useState(0)
+  
+  //useEffect is a hook that lets you perform side effects in function components
+  useEffect(() => {
+    console.log(`You ${hasLiked? 'liked' : 'disliked'} the movie ${title}`)
+  }, [hasLiked, title])
+
+  //handle count function
+  const handleCount = () => {
+    setCount((prevState) => prevState+ 1)
+  }
+
   return (
-   
-    <div className={isCool ? 'cool-background' : 'normal-background card-cointainer' } >
-      <h2>{title}</h2>
+    <div className="card-cointainer" onClick={handleCount}>
+      <h2>{title} - {count}</h2>
       <p>Rating: {ratings}</p>
       <p>Is this movie cool: {isCool? 'Yes' : 'No'}</p>
-      <button onClick={() => setHasLiked(!hasLiked)}>{
-        hasLiked? 'Liked' : 'Like'
-        }</button>
-      {/* <p>Actors: {actors.map(actor => actor.name).join(', ')}</p> */}
-     
+      <button onClick={() => setHasLiked(!hasLiked)}>{hasLiked? 'Liked' : 'Like'}</button>
     </div>
-  )
+  ) 
+ 
 }
 
 
