@@ -1,41 +1,36 @@
-useMemo
+useCallback
+To implement the useCallback hook in this code, we will use it to memoize the functions handleCount and handleLike. This will prevent these functions from being re-created on every render unless their dependencies change. This can be useful if these functions are passed down as props to child components, preventing unnecessary re-renders.
 
-To implement useMemo in the provided code, we can use it to memoize expensive calculations or values that don't need to be recalculated on every render unless their dependencies change. In this case, let's assume that the calculation of whether a movie is "cool" (based on ratings and isCool) is an expensive operation. We'll use useMemo to memoize this value, so it only recalculates when either ratings or isCool changes.
+In the example below, we will use useCallback to memoize both handleCount and handleLike functions.
 
-Breakdown of Changes:
-Using useMemo:
+Key Changes:
+Using useCallback for handleCount and handleLike:
 
-I used the useMemo hook to memoize the movieStatus calculation.
-
-The status is calculated based on ratings and isCool. If ratings are 4 or more and isCool is true, the movie is considered "Cool". Otherwise, it's considered "Not Cool".
-
-The movieStatus is recalculated only when the ratings or isCool props change.
+The useCallback hook is used to memoize the functions handleCount and handleLike. By doing so, these functions will only be re-created when their dependencies change. Since these functions don’t depend on any external variables, we pass an empty dependency array [].
 
 jsx
 Copy
-const movieStatus = useMemo(() => {
-  return ratings >= 4 && isCool ? 'Cool Movie' : 'Not Cool Movie';
-}, [ratings, isCool]);
-Effect of useMemo:
+const handleCount = useCallback(() => {
+  dispatch({ type: 'increment' });
+}, []);
 
-useMemo ensures that the movieStatus value is recalculated only when either ratings or isCool changes, thus preventing unnecessary recalculations on every render.
+const handleLike = useCallback(() => {
+  dispatch({ type: 'toggleLike' });
+}, []);
+handleCount and handleLike will now not be redefined on every render, and React will reuse the existing function unless their dependencies change. In this case, no dependencies are required, so the functions are memoized once.
 
-This can be especially beneficial if the logic for determining whether a movie is cool is more complex or if there are performance concerns.
+Why Use useCallback:
 
-Rendering movieStatus:
+useCallback is useful when you pass functions to child components as props, or if you want to prevent unnecessary re-creations of functions when they don’t need to be changed. If a function is passed down to a child component and doesn’t change frequently, useCallback ensures that the child doesn’t get re-rendered unnecessarily.
 
-I rendered movieStatus inside the Card component, which displays the computed status (either "Cool Movie" or "Not Cool Movie") based on the values of ratings and isCool.
+In this case, even though handleCount and handleLike are not passed down to child components, it's a good practice to memoize them in scenarios where the functions might be passed down or used in optimization strategies like React.memo or useEffect dependencies.
 
-When to Use useMemo:
-useMemo is useful when you have expensive calculations or operations inside the component that don't need to run on every render.
+Example Use Case for useCallback:
+If the Card component were to receive the handleCount and handleLike functions as props (from a parent component), useCallback would prevent those functions from being re-created on each render, which could improve performance especially if the Card component were part of a large list of components.
 
-In this case, useMemo ensures that the "coolness" calculation happens only when necessary (i.e., when ratings or isCool changes), improving performance in cases with more complex logic or larger datasets.
+When to Use useCallback:
+Passing functions down to child components: Prevents unnecessary re-renders of child components.
 
-Example Use Cases for useMemo:
-Expensive calculations that depend on specific props or state values.
-
-Memoizing arrays or objects to prevent unnecessary re-renders when passed as dependencies to other components or hooks.
-
-
+Expensive callbacks: Memoizes functions to avoid re-computation if the function logic is complex or used in optimization hooks like useEffect or React.memo.
 
 

@@ -1,6 +1,6 @@
-//For useMemo
+//useCallback
 
-import React, { useEffect, useReducer, useContext, useRef, useMemo } from 'react';
+import React, { useEffect, useReducer, useContext, useRef, useMemo, useCallback } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
@@ -34,15 +34,15 @@ function Card({ title, ratings, isCool, actors }) {
     console.log(`You ${state.hasLiked ? 'liked' : 'disliked'} the movie ${title}`);
   }, [state.hasLiked, title]);
 
-  // Handle count function using dispatch
-  const handleCount = () => {
+  // Memoize handleCount function using useCallback
+  const handleCount = useCallback(() => {
     dispatch({ type: 'increment' });
-  };
+  }, []);  // handleCount doesn't depend on any external state
 
-  // Handle like function using dispatch
-  const handleLike = () => {
+  // Memoize handleLike function using useCallback
+  const handleLike = useCallback(() => {
     dispatch({ type: 'toggleLike' });
-  };
+  }, []);  // handleLike doesn't depend on any external state
 
   // Handle card click to highlight it
   const handleCardClick = () => {
@@ -92,5 +92,6 @@ function App() {
 }
 
 export default App;
+
 
 
