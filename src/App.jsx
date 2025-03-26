@@ -1,6 +1,6 @@
-//useCallback
+//useEffectLayout
 
-import React, { useEffect, useReducer, useContext, useRef, useMemo, useCallback } from 'react';
+import React, { useEffect, useReducer, useContext, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
@@ -30,6 +30,7 @@ function Card({ title, ratings, isCool, actors }) {
   // Create a ref to reference the card DOM element
   const cardRef = useRef(null);
 
+  // useEffect to log when the movie like status changes
   useEffect(() => {
     console.log(`You ${state.hasLiked ? 'liked' : 'disliked'} the movie ${title}`);
   }, [state.hasLiked, title]);
@@ -57,6 +58,14 @@ function Card({ title, ratings, isCool, actors }) {
   const movieStatus = useMemo(() => {
     return ratings >= 4 && isCool ? 'Cool Movie' : 'Not Cool Movie';
   }, [ratings, isCool]);  // Only recalculate when ratings or isCool change
+
+  // useLayoutEffect to synchronously apply a style to the card element before painting
+  useLayoutEffect(() => {
+    if (cardRef.current) {
+      // Initially set a border color when the component renders
+      cardRef.current.style.border = '2px solid blue';
+    }
+  }, []); // Runs once when the component mounts
 
   return (
     <div
@@ -92,6 +101,3 @@ function App() {
 }
 
 export default App;
-
-
-
