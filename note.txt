@@ -1,41 +1,20 @@
-conditional Rendering
+go to tailwind.css 
+in vite project install by running npm install tailwindcss @tailwindcss/vite
 
-To integrate conditional rendering into your code, we can conditionally display parts of the Card component based on certain criteria. For example, we can show a message about whether the movie is considered "cool" or not, and also conditionally render the button to "like" the movie based on whether the user has already liked it.
+in your vite.config.js file add tailwind css and import it like this.
 
-Example of Conditional Rendering in Card Component:
-We can conditionally render content such as:
+import { defineConfig } from 'vite'
+import tailwindcss from '@tailwindcss/vite'
+export default defineConfig({
+  plugins: [
+    tailwindcss(),
+  ],
+})
 
-A message that tells the user if the movie is "Cool" or "Not Cool".
+in your index.css file replace everything with just this @import "tailwindcss";
 
-A conditional button label for "Like" or "Liked".
+then test it in app.js file.
 
-Let's integrate this into the existing code:
-
-Key Changes for Conditional Rendering:
-Conditional Movie Status Message: We are conditionally rendering whether the movie is "Cool" or "Not Cool" based on the ratings and isCool props:
-
-jsx
-Copy
-{ratings >= 4 && isCool ? (
-  <p>Cool Movie!</p>
-) : (
-  <p>Not Cool Movie</p>
-)}
-If the ratings are greater than or equal to 4 and isCool is true, we display "Cool Movie!". Otherwise, we show "Not Cool Movie".
-
-Conditional Button Label: The button label is conditionally rendered based on whether the movie has been liked or not. This is handled using the hasLiked state:
-
-jsx
-Copy
-<button onClick={handleLike}>
-  {state.hasLiked ? 'Liked' : 'Like'}
-</button>
-If state.hasLiked is true, the button will display "Liked"; otherwise, it will show "Like".
-
-When to Use Conditional Rendering:
-Conditionally rendering UI elements based on certain conditions or states.
-
-This pattern is useful when you want to show/hide elements, change their appearance, or display alternative content based on user interactions or state changes.
 
 
 
