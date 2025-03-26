@@ -1,53 +1,41 @@
-useRef
+useMemo
 
-To implement the useRef hook in your code, I'll add an example where useRef can be used to reference and interact with DOM elements in the Card component. A common use case for useRef is to access DOM elements directly, such as focusing on an input, measuring the size of an element, or in this case, highlighting the card when it's clicked.
+To implement useMemo in the provided code, we can use it to memoize expensive calculations or values that don't need to be recalculated on every render unless their dependencies change. In this case, let's assume that the calculation of whether a movie is "cool" (based on ratings and isCool) is an expensive operation. We'll use useMemo to memoize this value, so it only recalculates when either ratings or isCool changes.
 
-In this modified example, we'll use useRef to highlight the Card component when it's clicked by changing the background color.
+Breakdown of Changes:
+Using useMemo:
 
-Key Changes:
-Using useRef:
+I used the useMemo hook to memoize the movieStatus calculation.
 
-I created a reference to the Card DOM element with the line:
+The status is calculated based on ratings and isCool. If ratings are 4 or more and isCool is true, the movie is considered "Cool". Otherwise, it's considered "Not Cool".
 
-jsx
-Copy
-const cardRef = useRef(null);
-This cardRef is used to directly access the DOM node of the Card component.
-
-Attaching the ref to the DOM element:
-
-The ref is passed to the div element representing the card:
+The movieStatus is recalculated only when the ratings or isCool props change.
 
 jsx
 Copy
-<div ref={cardRef} className={`card-cointainer ${theme}`} onClick={handleCardClick}>
-This allows us to interact with this DOM element via the cardRef.
+const movieStatus = useMemo(() => {
+  return ratings >= 4 && isCool ? 'Cool Movie' : 'Not Cool Movie';
+}, [ratings, isCool]);
+Effect of useMemo:
 
-Handling Card Click to Highlight:
+useMemo ensures that the movieStatus value is recalculated only when either ratings or isCool changes, thus preventing unnecessary recalculations on every render.
 
-When the card is clicked, the handleCardClick function is triggered. It checks the current background color of the Card and toggles it to lightyellow when clicked, and resets it if it’s already highlighted:
+This can be especially beneficial if the logic for determining whether a movie is cool is more complex or if there are performance concerns.
 
-jsx
-Copy
-const handleCardClick = () => {
-  if (cardRef.current) {
-    cardRef.current.style.backgroundColor = cardRef.current.style.backgroundColor === 'lightyellow' ? '' : 'lightyellow';
-  }
-  handleCount();
-};
-What This Does:
-When you click on a Card, the background color will toggle between lightyellow and its original color, highlighting the card.
+Rendering movieStatus:
 
-The useRef hook allows you to interact with the Card's DOM element without needing to use state to store the background color.
+I rendered movieStatus inside the Card component, which displays the computed status (either "Cool Movie" or "Not Cool Movie") based on the values of ratings and isCool.
 
-Example Use Cases for useRef:
-Managing focus on an input field.
+When to Use useMemo:
+useMemo is useful when you have expensive calculations or operations inside the component that don't need to run on every render.
 
-Animating or measuring DOM elements directly.
+In this case, useMemo ensures that the "coolness" calculation happens only when necessary (i.e., when ratings or isCool changes), improving performance in cases with more complex logic or larger datasets.
 
-Avoiding re-renders by accessing DOM elements or mutable values directly.
+Example Use Cases for useMemo:
+Expensive calculations that depend on specific props or state values.
 
-In this case, useRef is used to directly manipulate the DOM to highlight the card when it's clicked.
+Memoizing arrays or objects to prevent unnecessary re-renders when passed as dependencies to other components or hooks.
+
 
 
 

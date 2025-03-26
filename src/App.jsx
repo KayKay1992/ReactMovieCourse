@@ -1,8 +1,6 @@
+//For useMemo
 
-
-//for useRef
-
-import React, { useEffect, useReducer, useContext, useRef } from 'react';
+import React, { useEffect, useReducer, useContext, useRef, useMemo } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
 import './App.css';
@@ -55,6 +53,11 @@ function Card({ title, ratings, isCool, actors }) {
     handleCount();
   };
 
+  // Use useMemo to memoize the calculation of whether the movie is cool
+  const movieStatus = useMemo(() => {
+    return ratings >= 4 && isCool ? 'Cool Movie' : 'Not Cool Movie';
+  }, [ratings, isCool]);  // Only recalculate when ratings or isCool change
+
   return (
     <div
       ref={cardRef}  // Attach the ref to the DOM element
@@ -63,7 +66,7 @@ function Card({ title, ratings, isCool, actors }) {
     >
       <h2>{title} - {state.count}</h2>
       <p>Rating: {ratings}</p>
-      <p>Is this movie cool: {isCool ? 'Yes' : 'No'}</p>
+      <p>{movieStatus}</p> {/* Memoized movie status */}
       <button onClick={handleLike}>
         {state.hasLiked ? 'Liked' : 'Like'}
       </button>
@@ -89,4 +92,5 @@ function App() {
 }
 
 export default App;
+
 
