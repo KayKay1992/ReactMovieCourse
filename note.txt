@@ -1,45 +1,41 @@
-useEffectLayout
+conditional Rendering
 
-To integrate the useLayoutEffect hook into your existing code, we can use it to perform layout calculations or DOM manipulations synchronously before the browser paints. This is useful when you want to make DOM changes or measurements before React updates the screen.
+To integrate conditional rendering into your code, we can conditionally display parts of the Card component based on certain criteria. For example, we can show a message about whether the movie is considered "cool" or not, and also conditionally render the button to "like" the movie based on whether the user has already liked it.
 
-In this example, we will use useLayoutEffect to change the background color of the cardRef element after the component renders, but before the paint happens. This ensures that the background color is updated immediately in the DOM, avoiding a flash of unstyled content or unwanted flickering
+Example of Conditional Rendering in Card Component:
+We can conditionally render content such as:
 
-Key Changes:
-Adding useLayoutEffect:
+A message that tells the user if the movie is "Cool" or "Not Cool".
 
-useLayoutEffect is similar to useEffect, but it runs synchronously after all DOM mutations. This means the DOM is updated, but the browser has not yet painted. This is ideal for making DOM changes like layout adjustments or measurements before the screen is updated.
+A conditional button label for "Like" or "Liked".
+
+Let's integrate this into the existing code:
+
+Key Changes for Conditional Rendering:
+Conditional Movie Status Message: We are conditionally rendering whether the movie is "Cool" or "Not Cool" based on the ratings and isCool props:
 
 jsx
 Copy
-useLayoutEffect(() => {
-  if (cardRef.current) {
-    // Initially set a border color when the component renders
-    cardRef.current.style.border = '2px solid blue';
-  }
-}, []); // Runs once when the component mounts
-In this example, useLayoutEffect is used to add a border around the card element when the component first mounts. This ensures the border is added immediately after React finishes rendering, but before the browser paints the changes to the screen.
+{ratings >= 4 && isCool ? (
+  <p>Cool Movie!</p>
+) : (
+  <p>Not Cool Movie</p>
+)}
+If the ratings are greater than or equal to 4 and isCool is true, we display "Cool Movie!". Otherwise, we show "Not Cool Movie".
 
-Why useLayoutEffect over useEffect?
+Conditional Button Label: The button label is conditionally rendered based on whether the movie has been liked or not. This is handled using the hasLiked state:
 
-useLayoutEffect is used when you need to perform operations that affect the layout or measurement of the DOM before the browser paints. It is helpful when dealing with animations, scroll positions, or layout adjustments that should be visible immediately.
+jsx
+Copy
+<button onClick={handleLike}>
+  {state.hasLiked ? 'Liked' : 'Like'}
+</button>
+If state.hasLiked is true, the button will display "Liked"; otherwise, it will show "Like".
 
-On the other hand, useEffect is generally used for side effects that do not affect the DOM directly or do not require synchronization with the layout. It runs after the paint.
+When to Use Conditional Rendering:
+Conditionally rendering UI elements based on certain conditions or states.
 
-When to Use useLayoutEffect:
-When you need to manipulate the DOM or get the measurements (e.g., element width, height, position) immediately after the DOM is mutated but before the browser has a chance to paint the changes.
-
-Ideal for scenarios like:
-
-Animations
-
-Measurements (e.g., calculating an element's position on the page)
-
-Preventing flicker or "layout thrashing"
-
-In this case, the useLayoutEffect hook ensures that the border is applied right after the component renders but before the browser paints, giving you more control over the layout changes and ensuring they happen seamlessly.
-
-
-
+This pattern is useful when you want to show/hide elements, change their appearance, or display alternative content based on user interactions or state changes.
 
 
 

@@ -1,5 +1,3 @@
-//useEffectLayout
-
 import React, { useEffect, useReducer, useContext, useRef, useMemo, useCallback, useLayoutEffect } from 'react';
 import reactLogo from './assets/react.svg';
 import viteLogo from '/vite.svg';
@@ -75,7 +73,12 @@ function Card({ title, ratings, isCool, actors }) {
     >
       <h2>{title} - {state.count}</h2>
       <p>Rating: {ratings}</p>
-      <p>{movieStatus}</p> {/* Memoized movie status */}
+      {/* Conditional rendering for movie status */}
+      {ratings >= 4 && isCool ? (
+        <p>Cool Movie!</p>
+      ) : (
+        <p>Not Cool Movie</p>
+      )}
       <button onClick={handleLike}>
         {state.hasLiked ? 'Liked' : 'Like'}
       </button>
