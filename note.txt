@@ -1,28 +1,50 @@
-USECONTEXT HOOK
-
-3. useContext
-The useContext hook allows you to access the value of a context directly within your components. Context is useful for passing data through the component tree without having to manually pass props at each level.
+ useReducer
+The useReducer hook is an alternative to useState and is typically used when state logic is complex, such as when the state depends on previous state values or when multiple values are involved.
 
 Example:
-jsx
-Copy
-import React, { useContext } from 'react';
+To implement the useReducer hook in the code you've provided, we will replace the useState for count and hasLiked with a useReducer hook. This is especially useful if we want to manage multiple related state values with more complex logic, as useReducer is typically used for that purpose.
 
-// Create a context
-const ThemeContext = React.createContext('light');
 
-function ThemedComponent() {
-  const theme = useContext(ThemeContext); // Access the current context value
-  return <div>The current theme is {theme}</div>;
-}
+1. Define the Reducer Function
+The reducer function will manage the state transitions for both count and hasLiked.
 
-function App() {
-  return (
-    <ThemeContext.Provider value="dark">
-      <ThemedComponent />
-    </ThemeContext.Provider>
-  );
-}
+2. Dispatch Actions
+Instead of using setCount and setHasLiked, we will dispatch actions to update the state.
 
-export default App;
-The useContext hook reads the theme from ThemeContext, which is provided by the ThemeContext.Provider.
+explaining the example code
+
+Breakdown of Changes:
+Reducer Function (cardReducer):
+
+The cardReducer function manages two pieces of state: count and hasLiked.
+
+It handles two actions:
+
+increment: Increments the count.
+
+toggleLike: Toggles the hasLiked state between true and false.
+
+useReducer Hook:
+
+The useReducer hook is initialized with the cardReducer and an initial state { count: 0, hasLiked: false }.
+
+dispatch is used to send actions to update the state.
+
+Actions:
+
+Instead of setCount and setHasLiked, we dispatch actions:
+
+dispatch({ type: 'increment' }) is used to increment the count.
+
+dispatch({ type: 'toggleLike' }) is used to toggle the hasLiked state.
+
+Effect Hook (useEffect):
+
+The useEffect hook logs whether the movie was liked or disliked, based on the hasLiked state, and it runs whenever hasLiked or title changes.
+
+Result:
+Each Card component now uses useReducer to manage the state of count and hasLiked.
+
+The logic for incrementing the count and toggling the like state is handled by dispatching actions to the reducer.
+
+The useContext hook still provides the theme value for styling, and the Card components display the current theme.
