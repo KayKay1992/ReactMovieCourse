@@ -1,10 +1,78 @@
-Fetching external data from the movie api
-google tmdb 
-head over to api reference
-then search for movie
-we want to use discover movie.
-create an account with tmdb
+Displaying the movies with all the datas in the ui for the users to see.
 
-currently we consoled the datas that we fetched that means users are not seeing it but next we want to display it to the users.
+we created a state field like movie state where we place the movie we have fetched from the api.
 
+explaining the advance conditional rendering
 
+This block of JSX is rendering a list of movies dynamically, using the moviesList array. Let me explain how it works, step by step:
+
+Code Breakdown:
+jsx
+Copy
+<ul>
+  {moviesList.map((movie) => (
+    <li key={movie.id}>
+      <img
+        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
+        alt={movie.title}
+      />
+      <h3 className="text-white">{movie.title}</h3>
+      <p className="text-white">{movie.overview.substring(0, 150)}...</p>
+    </li>
+  ))}
+</ul>
+1. {moviesList.map((movie) => ( ... ))}:
+This is conditional rendering or dynamic rendering.
+
+The map() function is iterating over each item (movie) in the moviesList array.
+
+For each movie, a <li> element is created that contains an image, title, and a short description.
+
+movie represents each individual movie object in the list during each iteration.
+
+2. <li key={movie.id}>:
+Each list item (<li>) is wrapped with a unique key prop (key={movie.id}).
+
+React uses the key to efficiently update and re-render the list when items change. It helps React identify which items have changed, been added, or removed, which improves performance.
+
+3. <img src={https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} />`:
+This <img> element renders the poster of the movie.
+
+The src is dynamically generated using the poster_path of each movie. It fetches the image from the API by concatenating the base image URL (https://image.tmdb.org/t/p/w500) with the movie.poster_path returned by the API.
+
+The alt attribute is set to the movie.title, which provides alternative text in case the image cannot be displayed.
+
+4. <h3 className="text-white">{movie.title}</h3>:
+The title of the movie is displayed within an <h3> tag.
+
+The className="text-white" applies a white text color to the title using CSS.
+
+5. <p className="text-white">{movie.overview.substring(0, 150)}...</p>:
+This <p> tag renders the movie's overview (description).
+
+movie.overview.substring(0, 150) extracts the first 150 characters of the movie's overview to avoid displaying the entire description, making the display more compact.
+
+The ... is added after the truncated text to indicate there’s more content that’s been cut off.
+
+className="text-white" is used to apply white text color to the description.
+
+What Happens at Runtime:
+When the moviesList is available (i.e., an array of movie objects), React will iterate over this list and render an <li> for each movie.
+
+Each <li> will display:
+
+A poster image using the movie's poster_path.
+
+The movie's title.
+
+A truncated version of the movie's description (overview).
+
+This rendering happens dynamically based on the number of items in moviesList.
+
+When Will This Render?
+This rendering happens whenever the moviesList changes. If moviesList is fetched from an API (for example, when the component first loads or after a search), this list will automatically be rendered with the updated data.
+
+Conditional Rendering (Implicitly in this case):
+The rendering logic inside the map() will only be executed if moviesList contains data. If moviesList is empty or undefined, no items will be rendered.
+
+This behavior is implicitly conditional. If there are no movies to display, nothing will be shown on the page.
