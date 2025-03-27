@@ -1,134 +1,30 @@
-Creating a movie card component
+Implementing search functionality
 
-The code you've provided defines a MovieCard functional component in React. This component is responsible for rendering a movie card with details like the movie's title, rating, poster, release date, and original language. Here's a detailed breakdown of how this component works:
+Key Updates:
+fetchMovies function:
 
-1. Props Destructuring:
-The component receives a movie object as a prop. The destructuring syntax allows you to directly extract specific properties from the movie object:
+The function now takes query (search term) as an argument. It checks if a search term is provided and constructs the appropriate URL to either fetch search results or popular movies.
 
-javascript
-Copy
-const MovieCard = ({ movie: { title, vote_average, poster_path, release_date, original_language } }) => {
-This means that the MovieCard component expects a movie prop and destructures it into individual properties:
+I added a check to display a message when no movies are found after a search, and I made sure that the API properly handles empty results.
 
-title: The movie's title.
+Handling Search Term:
 
-vote_average: The average rating of the movie.
+The useEffect hook is triggered every time the searchTerm changes, and it calls fetchMovies with the updated search term.
 
-poster_path: The URL path to the movie's poster image.
+When the search term is empty (i.e., no search term), the app will fetch popular movies by default.
 
-release_date: The release date of the movie.
+Spinner and Error Handling:
 
-original_language: The language in which the movie was originally released.
+I added a loading spinner (Spinner) when data is being fetched, and an error message will be shown if the request fails or there are no results.
 
-2. Rendering the Movie Card:
-The component returns JSX to render the movie details. Let’s go through each part:
+How it Works:
+Initial Load: When the app loads for the first time, it will fetch popular movies by default.
 
-jsx
-Copy
-<div className='movie-card'>
-This is the root element for the movie card. It has a className of movie-card, which is where the styling for the movie card will be applied.
+Search: When a user types a query into the search bar and submits, the searchTerm state will update, and the useEffect hook will fetch the search results.
 
-Poster Image:
-jsx
-Copy
-<img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : `/no-movie.png`} alt={title}/>
-This img tag renders the movie poster.
+Error Handling: If no results are found, an appropriate message will be shown, and if there is an error, it will be displayed.
 
-It uses a ternary operator to check if poster_path exists. If it does, the image source will be a URL constructed with the base URL for images from the API (https://image.tmdb.org/t/p/w500/) followed by the poster_path of the movie.
+Things to Keep in Mind:
+Ensure the API_KEY is valid and accessible through the environment variable.
 
-If poster_path does not exist (for example, when no poster is available for the movie), it falls back to a local image (/no-movie.png), which serves as a placeholder image when no poster is found.
-
-Movie Title:
-jsx
-Copy
-<h3>{title}</h3>
-This renders the movie’s title inside an <h3> tag.
-
-Movie Details (Rating, Language, Year):
-Below the title, the component renders more details about the movie, such as the rating, language, and release year.
-
-jsx
-Copy
-<div className="content">
-  <div className="rating">
-    <img src={start_Icon} alt='Star Icon'/>
-    <p>{vote_average ? vote_average.toFixed(1): 'N/A'}</p>
-  </div>
-  <span>•</span>
-  <p className='lang'>{original_language}</p>
-  <span>•</span>
-  <p className="year">
-    {release_date ? new Date(release_date).getFullYear() : 'N/A'}
-  </p>
-</div>
-Rating:
-
-The rating section displays the movie’s average vote (vote_average).
-
-The img tag renders a star icon (imported as start_Icon) to represent the rating visually.
-
-The p tag displays the vote_average, formatted to one decimal place using .toFixed(1). If vote_average is unavailable, it displays 'N/A'.
-
-Language:
-
-A span separates each piece of information, and the p tag with class lang displays the movie's original language (e.g., "en" for English).
-
-If the original_language is missing, the value will just display as 'N/A'.
-
-Release Year:
-
-The p tag with class year displays the year of the movie's release.
-
-The release_date is converted to a Date object, and the .getFullYear() method is used to extract the year.
-
-If no release date is available, it will display 'N/A'.
-
-3. Fallback Mechanism for Missing Data:
-The ternary operators throughout the component are used as fallback mechanisms. For example:
-
-If poster_path is not available, the fallback image /no-movie.png will be shown.
-
-If vote_average is unavailable, 'N/A' will be shown in place of the rating.
-
-If release_date is not present, 'N/A' will be displayed for the year.
-
-Full Code Example:
-jsx
-Copy
-import React from 'react';
-import start_Icon from '../assets/star.svg'; // Star icon for rating
-
-const MovieCard = ({ movie: { title, vote_average, poster_path, release_date, original_language } }) => {
-  return (
-    <div className='movie-card'>
-      <img 
-        src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : `/no-movie.png`} 
-        alt={title}
-      />
-      <div className='mt-4'>
-        <h3>{title}</h3>
-        <div className="content">
-          <div className="rating">
-            <img src={start_Icon} alt='Star Icon' />
-            <p>{vote_average ? vote_average.toFixed(1) : 'N/A'}</p>
-          </div>
-          <span>•</span>
-          <p className='lang'>{original_language}</p>
-          <span>•</span>
-          <p className="year">
-            {release_date ? new Date(release_date).getFullYear() : 'N/A'}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-};
-
-export default MovieCard;
-Summary:
-Dynamic Data Rendering: The MovieCard component dynamically renders movie details such as the title, rating, language, poster, and release year, based on the data passed to it as props.
-
-Fallbacks: The component gracefully handles missing data by providing fallback values like 'N/A' or placeholder images.
-
-Styling: You can apply custom CSS classes (movie-card, content, rating, etc.) to style the elements in the card. Make sure to define these styles in your CSS files.
-
+The Search component should update the searchTerm correctly when the user types something into the search bar. If you need help with the Search component, feel free to ask!
