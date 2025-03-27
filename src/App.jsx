@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useDebounce } from "react-use";
 import hero from './assets/hero.png';
 import Search from "./Components/Search";
 import Spinner from "./Components/Spinner";
@@ -26,6 +27,12 @@ function App() {
   const [errorMessage, setErrorMessage] = useState(''); // Error message state
   const [moviesList, setMoviesList] = useState([]); // Movies state
   const [isLoading, setIsLoading] = useState(false); // Loading state
+  // Debounce search term to prevent unnecessary API calls
+  const [debounceSearchTerm, setDebounceSearchTerm] = useState('');
+
+  //then we call a debounce hook and pass a function to it
+  //this waits for the user to stop typing for 500ms before it starts searching.
+  useDebounce(()=> setDebounceSearchTerm(searchTerm), 500, [searchTerm])
 
   // Function to fetch movies
   const fetchMovies = async (query = '') => {
@@ -71,8 +78,8 @@ function App() {
 
   // useEffect hook to fetch movies when the search term changes
   useEffect(() => {
-    fetchMovies(searchTerm);
-  }, [searchTerm]); // Trigger whenever searchTerm changes
+    fetchMovies(debounceSearchTerm);
+  }, [debounceSearchTerm]); // Trigger whenever searchTerm changes
 
   return (
     <main>
