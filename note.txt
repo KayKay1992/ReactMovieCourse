@@ -1,60 +1,10 @@
-Our first Component.
-writing our first state and passing it as prop.
+Fetching external data from the movie api
+google tmdb 
+head over to api reference
+then search for movie
+we want to use discover movie.
+create an account with tmdb
 
-Let's break down the two key concepts you're asking about: searchTerm state and passing state as props.
-
-1. searchTerm state:
-In the App component, you are using React's useState hook to create a state variable called searchTerm:
-
-jsx
-Copy
-const [searchTerm, setSearchTerm] = useState('');
-searchTerm is the state variable that holds the value of the search term (initially set to an empty string '').
-
-setSearchTerm is the function that will be used to update the searchTerm state.
-
-How does this work?
-
-The searchTerm state is used to store whatever the user is typing into a search input field (e.g., a text box). Initially, it is set to an empty string, but it will update every time the user changes the search term (e.g., by typing in a search field).
-
-setSearchTerm is used to update the value of searchTerm whenever the user interacts with the search input.
-
-2. Passing state as props:
-In the App component, you are passing the searchTerm state and the setSearchTerm function as props to the Search component:
-
-jsx
-Copy
-<Search searchTerm={searchTerm} setSearchTerm={setSearchTerm}/>
-Here, searchTerm is being passed to the Search component so it can access the current value of the search term.
-
-setSearchTerm is also being passed as a prop to allow the Search component to update the searchTerm state when the user types in a search field.
-
-
-Key Concepts:
-State (searchTerm): In the App component, searchTerm holds the current value of the search input field.
-
-Passing state as props: The searchTerm and setSearchTerm are passed down to the Search component, allowing the Search component to display the current value of searchTerm and modify it when the user types.
-
-Prop-drilling: By passing searchTerm and setSearchTerm to the Search component as props, the App component is making these values available to the Search component.
-
-Flow of data:
-App component:
-
-The App component creates the searchTerm state using useState.
-
-The searchTerm and setSearchTerm are passed as props to the Search component.
-
-Search component:
-
-The Search component uses the searchTerm prop to bind the value of the search input field.
-
-It also uses setSearchTerm to update the searchTerm state in the App component whenever the user types in the input field.
-
-This is a common pattern in React, where a parent component (like App) manages the state, and child components (like Search) interact with the state through props to either display it or update it.
-
-
-
-
-
+currently we consoled the datas that we fetched that means users are not seeing it but next we want to display it to the users.
 
 
