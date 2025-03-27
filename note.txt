@@ -1,78 +1,134 @@
-Displaying the movies with all the datas in the ui for the users to see.
+Creating a movie card component
 
-we created a state field like movie state where we place the movie we have fetched from the api.
+The code you've provided defines a MovieCard functional component in React. This component is responsible for rendering a movie card with details like the movie's title, rating, poster, release date, and original language. Here's a detailed breakdown of how this component works:
 
-explaining the advance conditional rendering
+1. Props Destructuring:
+The component receives a movie object as a prop. The destructuring syntax allows you to directly extract specific properties from the movie object:
 
-This block of JSX is rendering a list of movies dynamically, using the moviesList array. Let me explain how it works, step by step:
+javascript
+Copy
+const MovieCard = ({ movie: { title, vote_average, poster_path, release_date, original_language } }) => {
+This means that the MovieCard component expects a movie prop and destructures it into individual properties:
 
-Code Breakdown:
+title: The movie's title.
+
+vote_average: The average rating of the movie.
+
+poster_path: The URL path to the movie's poster image.
+
+release_date: The release date of the movie.
+
+original_language: The language in which the movie was originally released.
+
+2. Rendering the Movie Card:
+The component returns JSX to render the movie details. Let’s go through each part:
+
 jsx
 Copy
-<ul>
-  {moviesList.map((movie) => (
-    <li key={movie.id}>
-      <img
-        src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-        alt={movie.title}
+<div className='movie-card'>
+This is the root element for the movie card. It has a className of movie-card, which is where the styling for the movie card will be applied.
+
+Poster Image:
+jsx
+Copy
+<img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : `/no-movie.png`} alt={title}/>
+This img tag renders the movie poster.
+
+It uses a ternary operator to check if poster_path exists. If it does, the image source will be a URL constructed with the base URL for images from the API (https://image.tmdb.org/t/p/w500/) followed by the poster_path of the movie.
+
+If poster_path does not exist (for example, when no poster is available for the movie), it falls back to a local image (/no-movie.png), which serves as a placeholder image when no poster is found.
+
+Movie Title:
+jsx
+Copy
+<h3>{title}</h3>
+This renders the movie’s title inside an <h3> tag.
+
+Movie Details (Rating, Language, Year):
+Below the title, the component renders more details about the movie, such as the rating, language, and release year.
+
+jsx
+Copy
+<div className="content">
+  <div className="rating">
+    <img src={start_Icon} alt='Star Icon'/>
+    <p>{vote_average ? vote_average.toFixed(1): 'N/A'}</p>
+  </div>
+  <span>•</span>
+  <p className='lang'>{original_language}</p>
+  <span>•</span>
+  <p className="year">
+    {release_date ? new Date(release_date).getFullYear() : 'N/A'}
+  </p>
+</div>
+Rating:
+
+The rating section displays the movie’s average vote (vote_average).
+
+The img tag renders a star icon (imported as start_Icon) to represent the rating visually.
+
+The p tag displays the vote_average, formatted to one decimal place using .toFixed(1). If vote_average is unavailable, it displays 'N/A'.
+
+Language:
+
+A span separates each piece of information, and the p tag with class lang displays the movie's original language (e.g., "en" for English).
+
+If the original_language is missing, the value will just display as 'N/A'.
+
+Release Year:
+
+The p tag with class year displays the year of the movie's release.
+
+The release_date is converted to a Date object, and the .getFullYear() method is used to extract the year.
+
+If no release date is available, it will display 'N/A'.
+
+3. Fallback Mechanism for Missing Data:
+The ternary operators throughout the component are used as fallback mechanisms. For example:
+
+If poster_path is not available, the fallback image /no-movie.png will be shown.
+
+If vote_average is unavailable, 'N/A' will be shown in place of the rating.
+
+If release_date is not present, 'N/A' will be displayed for the year.
+
+Full Code Example:
+jsx
+Copy
+import React from 'react';
+import start_Icon from '../assets/star.svg'; // Star icon for rating
+
+const MovieCard = ({ movie: { title, vote_average, poster_path, release_date, original_language } }) => {
+  return (
+    <div className='movie-card'>
+      <img 
+        src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : `/no-movie.png`} 
+        alt={title}
       />
-      <h3 className="text-white">{movie.title}</h3>
-      <p className="text-white">{movie.overview.substring(0, 150)}...</p>
-    </li>
-  ))}
-</ul>
-1. {moviesList.map((movie) => ( ... ))}:
-This is conditional rendering or dynamic rendering.
+      <div className='mt-4'>
+        <h3>{title}</h3>
+        <div className="content">
+          <div className="rating">
+            <img src={start_Icon} alt='Star Icon' />
+            <p>{vote_average ? vote_average.toFixed(1) : 'N/A'}</p>
+          </div>
+          <span>•</span>
+          <p className='lang'>{original_language}</p>
+          <span>•</span>
+          <p className="year">
+            {release_date ? new Date(release_date).getFullYear() : 'N/A'}
+          </p>
+        </div>
+      </div>
+    </div>
+  );
+};
 
-The map() function is iterating over each item (movie) in the moviesList array.
+export default MovieCard;
+Summary:
+Dynamic Data Rendering: The MovieCard component dynamically renders movie details such as the title, rating, language, poster, and release year, based on the data passed to it as props.
 
-For each movie, a <li> element is created that contains an image, title, and a short description.
+Fallbacks: The component gracefully handles missing data by providing fallback values like 'N/A' or placeholder images.
 
-movie represents each individual movie object in the list during each iteration.
+Styling: You can apply custom CSS classes (movie-card, content, rating, etc.) to style the elements in the card. Make sure to define these styles in your CSS files.
 
-2. <li key={movie.id}>:
-Each list item (<li>) is wrapped with a unique key prop (key={movie.id}).
-
-React uses the key to efficiently update and re-render the list when items change. It helps React identify which items have changed, been added, or removed, which improves performance.
-
-3. <img src={https://image.tmdb.org/t/p/w500${movie.poster_path}`} alt={movie.title} />`:
-This <img> element renders the poster of the movie.
-
-The src is dynamically generated using the poster_path of each movie. It fetches the image from the API by concatenating the base image URL (https://image.tmdb.org/t/p/w500) with the movie.poster_path returned by the API.
-
-The alt attribute is set to the movie.title, which provides alternative text in case the image cannot be displayed.
-
-4. <h3 className="text-white">{movie.title}</h3>:
-The title of the movie is displayed within an <h3> tag.
-
-The className="text-white" applies a white text color to the title using CSS.
-
-5. <p className="text-white">{movie.overview.substring(0, 150)}...</p>:
-This <p> tag renders the movie's overview (description).
-
-movie.overview.substring(0, 150) extracts the first 150 characters of the movie's overview to avoid displaying the entire description, making the display more compact.
-
-The ... is added after the truncated text to indicate there’s more content that’s been cut off.
-
-className="text-white" is used to apply white text color to the description.
-
-What Happens at Runtime:
-When the moviesList is available (i.e., an array of movie objects), React will iterate over this list and render an <li> for each movie.
-
-Each <li> will display:
-
-A poster image using the movie's poster_path.
-
-The movie's title.
-
-A truncated version of the movie's description (overview).
-
-This rendering happens dynamically based on the number of items in moviesList.
-
-When Will This Render?
-This rendering happens whenever the moviesList changes. If moviesList is fetched from an API (for example, when the component first loads or after a search), this list will automatically be rendered with the updated data.
-
-Conditional Rendering (Implicitly in this case):
-The rendering logic inside the map() will only be executed if moviesList contains data. If moviesList is empty or undefined, no items will be rendered.
-
-This behavior is implicitly conditional. If there are no movies to display, nothing will be shown on the page.

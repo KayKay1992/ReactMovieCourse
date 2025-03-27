@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import hero from './assets/hero.png'
 import Search from "./Components/Search";
 import Spinner from "./Components/Spinner";
+import MovieCard from "./Components/MovieCard";
 
 //API - Application Programming Interface - a set of rules that allows onesoftware application to talk to another application.
 
@@ -99,14 +100,7 @@ function App() {
          ): (
           <ul>
             {moviesList.map((movie) => (
-              <li key={movie.id}>
-                <img
-                  src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
-                  alt={movie.title}
-                />
-                <h3 className="text-white">{movie.title}</h3>
-                <p className="text-white">{movie.overview.substring(0, 150)}...</p>
-              </li>
+              <MovieCard key={movie.id} movie={movie}/>
             ))}
           </ul>
          )}
