@@ -1,12 +1,13 @@
 import React from 'react'
 import start_Icon from '../assets/star.svg'
+import no_image from '../assets/no-movie.png'
 
 const MovieCard = ({movie: {title, vote_average, poster_path, release_date, original_language }}) => {
   return (
     <div className='movie-card'>
        {/* <img src={`https://image.tmdb.org/t/p/w185/${poster_path}`} alt={title} />
       <h3>{title}</h3> */}
-      <img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : `../assets/no-movie.png`} alt={title}/>
+      <img src={poster_path ? `https://image.tmdb.org/t/p/w500/${poster_path}` : no_image} alt={title}/>
       <div className='mt-4'>
         <h3>{title}</h3>
        <div className="content">

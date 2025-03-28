@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom"; // Import router
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom"; 
 import { useDebounce } from "react-use";
 import hero from './assets/hero.png';
 import Search from "./Components/Search";
 import Spinner from "./Components/Spinner";
 import MovieCard from "./Components/MovieCard";
-import MovieDetails from "./Components/MovieDetails"; // Import MovieDetails component
-import { getTrendingMovies, updateSearchCount } from "./appwrite";
+import MovieDetails from "./Components/MovieDetails"; 
+import { getTrendingMovies, updateSearchCount } from "./appwrite"; // Assuming getTrendingMovies fetches trending movies
 import MoviePlayer from "./Components/WatchProviders";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
@@ -15,7 +15,7 @@ const API_OPTIONS = {
   method: "GET",
   headers: {
     "Content-Type": "application/json",
-    "Authorization": `Bearer ${API_KEY}`,
+    // "Authorization": `Bearer ${API_KEY}`,
   },
 };
 
@@ -32,16 +32,18 @@ function App() {
   const [totalPages, setTotalPages] = useState(1);
   const [moviesPerPage] = useState(36);
 
+  // Debouncing the search term
   useDebounce(() => setDebounceSearchTerm(searchTerm), 500, [searchTerm]);
 
+  // Fetch Movies Based on Search Term or Trending
   const fetchMovies = async (query = '', page = 1) => {
     try {
       setIsLoading(true);
       setErrorMessage('');
 
       const endpoint = query
-        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}`
-        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${page}`;
+      ? `${API_BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
+      : `${API_BASE_URL}/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&page=${page}`;
 
       const response = await fetch(endpoint, API_OPTIONS);
       if (!response.ok) {
@@ -70,12 +72,14 @@ function App() {
     }
   };
 
+  // Fetch Trending Movies
   const fetchTrendingMovies = async () => {
     try {
       setIsTrendingLoading(true);
       setTrendingError('');
-      const movies = await getTrendingMovies();
-      setTrendingMovies(movies);
+     const response = await fetch(`${API_BASE_URL}/trending/movie/day?api_key=${API_KEY}`);
+      const data = await response.json();
+      setTrendingMovies(data.results);
     } catch (error) {
       console.error(`Error fetching trending movies: ${error}`);
       setTrendingError('Error fetching trending movies. Please try again later.');
@@ -84,6 +88,7 @@ function App() {
     }
   };
 
+  // Handle Page Change
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -91,13 +96,14 @@ function App() {
     }
   };
 
+  // Fetch Movies and Trending Movies on Initial Render
   useEffect(() => {
-    fetchMovies(debounceSearchTerm, currentPage);
+    if (debounceSearchTerm) {
+      fetchMovies(debounceSearchTerm, currentPage);
+    } else {
+      fetchTrendingMovies();
+    }
   }, [debounceSearchTerm, currentPage]);
-
-  useEffect(() => {
-    fetchTrendingMovies();
-  }, []);
 
   return (
     <Router>
@@ -117,22 +123,21 @@ function App() {
               path="/"
               element={
                 <section className="all-movies">
-                  <h2>All Movies</h2>
-                  {isLoading ? (
+                  <h2>{debounceSearchTerm ? 'Search Results' : 'Trending Movies'}</h2>
+                  {isLoading || isTrendingLoading ? (
                     <Spinner />
-                  ) : errorMessage ? (
-                    <p className="text-red-500">{errorMessage}</p>
+                  ) : errorMessage || trendingError ? (
+                    <p className="text-red-500">{errorMessage || trendingError}</p>
                   ) : (
                     <ul>
-                      {moviesList.map((movie) => (
+                      {(debounceSearchTerm ? moviesList : trendingMovies).map((movie) => (
                         <Link to={`/movie/${movie.id}`} key={movie.id}>
-                        <MovieCard movie={movie} />
-                      </Link>
-                      
+                          <MovieCard movie={movie} />
+                        </Link>
                       ))}
                     </ul>
                   )}
-                  {totalPages > 1 && (
+                  {totalPages > 1 && !debounceSearchTerm && (
                     <div className="pagination">
                       <button
                         disabled={currentPage <= 1}
@@ -156,7 +161,7 @@ function App() {
               path="/movie/:id"
               element={<MovieDetails />}
             />
-          </Routes>       
+          </Routes>
         </div>
       </main>
     </Router>

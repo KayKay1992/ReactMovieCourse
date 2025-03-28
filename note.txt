@@ -1,108 +1,58 @@
-Implement thriller video
+fixing eror for searching and rendering my trending movies.
 
-Here's how to add a video trailer section to your MovieDetails component using the TMDB API:
+The 401 authorization error you're encountering is likely due to an issue with how you're passing the API key to the TMDB API. Let me help you fix this.
 
-1. First, Add Trailer Fetching Logic
-jsx
-Copy
-const [trailerKey, setTrailerKey] = useState(null);
-const [isTrailerLoading, setIsTrailerLoading] = useState(false);
+### Issues in Your Code:
 
-const fetchTrailer = async (movieId) => {
-  setIsTrailerLoading(true);
-  try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
-    );
-    const data = await response.json();
-    const trailer = data.results.find(
-      (video) => video.type === "Trailer" && video.site === "YouTube"
-    );
-    setTrailerKey(trailer?.key);
-  } catch (error) {
-    console.error("Error fetching trailer:", error);
-  } finally {
-    setIsTrailerLoading(false);
-  }
+1. **Inconsistent API Key Usage**: You're using both `Authorization: Bearer` header and `api_key` query parameter in different places.
+2. **TMDB API Requirements**: TMDB API v3 typically expects the API key as a query parameter, not as a Bearer token.
+
+### Here's how to fix it:
+
+1. **Update your API_OPTIONS**:
+```javascript
+const API_OPTIONS = {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    // Remove the Authorization header
+  },
 };
+```
 
-useEffect(() => {
-  if (id) {
-    fetchTrailer(id);
-  }
-}, [id]);
-2. Add the Trailer Section to Your JSX
-jsx
-Copy
-return (
-  <div className="movie-details">
-    {/* ... your existing code ... */}
-    
-    {/* Trailer Section */}
-    <section className="trailer-section">
-      <h2>Trailer</h2>
-      {isTrailerLoading ? (
-        <div className="spinner"></div>
-      ) : trailerKey ? (
-        <div className="video-container">
-          <iframe
-            width="100%"
-            height="500"
-            src={`https://www.youtube.com/embed/${trailerKey}`}
-            title={`${movieDetails.title} Trailer`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
-        </div>
-      ) : (
-        <p>No trailer available</p>
-      )}
-    </section>
-  </div>
-);
-3. Add CSS Styling
-css
-Copy
-/* Add to MovieDetails.css */
-.trailer-section {
-  margin: 3rem 0;
-  padding: 0 1rem;
-}
+2. **Modify your fetch calls** to include the API key as a query parameter:
 
-.video-container {
-  position: relative;
-  padding-bottom: 56.25%; /* 16:9 aspect ratio */
-  height: 0;
-  overflow: hidden;
-  margin-top: 1rem;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
-}
+```javascript
+// In fetchMovies:
+const endpoint = query
+  ? `${API_BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
+  : `${API_BASE_URL}/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&page=${page}`;
 
-.video-container iframe {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  border: none;
-}
-Key Features:
-Automatically Finds the Best Trailer:
+// In fetchTrendingMovies:
+const response = await fetch(`${API_BASE_URL}/trending/movie/day?api_key=${API_KEY}`);
+```
 
-Filters for YouTube trailers specifically
+### Additional Recommendations:
 
-Falls back to "No trailer available" message
+1. **Verify your API_KEY**:
+   - Make sure `VITE_TMDB_API_KEY` is properly set in your `.env` file
+   - The .env file should be in your project root
+   - The .env file should contain: `VITE_TMDB_API_KEY=your_api_key_here`
 
-Responsive Design:
+2. **Error Handling**:
+   - Add more detailed error handling to see the exact error response from the API:
+   ```javascript
+   if (!response.ok) {
+     const errorData = await response.json();
+     console.error('API Error:', errorData);
+     throw new Error(errorData.status_message || 'Error fetching movies');
+   }
+   ```
 
-16:9 aspect ratio maintained on all screens
+3. **Rate Limiting**:
+   - TMDB has rate limits, so if you're making too many requests quickly, you might get 401 errors.
 
-Mobile-friendly with proper padding
+4. **Check API Key Permissions**:
+   - Ensure your TMDB API key has the correct permissions for the endpoints you're accessing.
 
-Loading States:
-
-Shows spinner while fetching
-
-Handles errors gracefully
+The key change is that TMDB expects the API key as a query parameter (`api_key=YOUR_KEY`) rather than as a Bearer token in the Authorization header. This is the most common reason for 401 errors with the TMDB API.
