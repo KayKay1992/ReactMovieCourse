@@ -1,37 +1,12 @@
-pagination fixed
+Deployment
 
-If the pagination buttons are not showing up in the UI, there are a few things we can check and update to ensure everything works properly.
+in vite.config.js we added the base   base: "/ReactMovieCourse" the base path should be the name of your project in github
 
-Here’s a checklist and the modifications to ensure pagination buttons display and function correctly:
+in package.json we added home page which is a link to your project in github e.g  "homepage": "https://KayKay1992.github.io/ReactMovieCourse/",
 
-1. CSS Styling for Pagination
-First, ensure that the pagination buttons have appropriate styles so that they are visible. Add some basic styling for the pagination buttons to make them stand out.
+we ran npm install gh-pages to install github page packages.
 
-2. Ensure Correct Page Calculation
-Ensure that the page navigation logic (currentPage and totalPages) is being set correctly when new data is fetched.
+in package.json we added 2 scripts     "predeploy": "npm run build",
+    "deploy": "gh-pages -d dist".
 
-3. Update the JSX Layout
-Add the pagination buttons and ensure they are properly rendered below the movie list.
-
-To ensure the pagination appears for both trending movies and search results, you need to make a few adjustments to the logic where the pagination buttons are conditionally rendered. Specifically, you should make sure that pagination is displayed for both the search term results and the trending movies by ensuring the totalPages is set and that the pagination buttons are rendered appropriately for both cases.
-
-Key Updates:
-Pagination Logic: Display pagination buttons whether you're viewing search results or trending movies.
-
-Pagination Display: Ensure totalPages is always set correctly for both the search and trending data.
-
-Here is the updated code with the pagination buttons showing for both cases:
-
-To implement proper pagination functionality on the trending movies page—where clicking on the "Next" button takes you to the next page and clicking on the "Previous" button goes back—you will need to adjust how you fetch and manage the data for the trending movies as the user navigates through the pages.
-
-We can modify the logic slightly to ensure that the pagination for trending movies is properly handled with separate state for page tracking, and we also need to trigger a fetch call to get the new page data when the user clicks on the pagination buttons.
-
-Here's how we can achieve that:
-
-Key Steps:
-Track the current page for trending movies separately.
-
-Update the page when clicking "Previous" or "Next" on the pagination buttons.
-
-Fetch new data based on the updated page for trending movies.
-
+then we push it to github
