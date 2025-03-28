@@ -1,44 +1,284 @@
-Adding Pagination 
+Routing using React router Dom by creating a movieDetail component.
 
-To implement pagination for the movie list in your code, you’ll need to adjust your API calls so that you can load more movies in chunks (or pages) rather than loading all movies at once. Typically, this is done by adding a page parameter to the API request and adjusting the state for the current page and total pages.
+To add a Movie Details page to your existing code, we need to create a route for displaying the details of a selected movie. We can achieve this by using React Router. Here’s the step-by-step guide to implement it.
 
-Here’s a step-by-step implementation:
+Steps to Add Movie Details Page:
+Install React Router: First, install React Router if it's not already installed in your project:
 
-1. Add State for Pagination:
-Track the current page.
+bash
+Copy
+npm install react-router-dom
+Set Up Routing: We'll modify your App.js to handle routing between the home page and the movie details page.
 
-Track the total number of pages (if the API provides this information).
+Create MovieDetails Component: We'll create a new component that will show the details of a selected movie.
 
-Track whether there are more pages to load.
+Pass Movie ID on Click: When a user clicks on a movie card, it will navigate to the Movie Details page, passing the id of the movie via the URL.
 
-2. Modify the API call to include pagination:
-Use the page parameter in the API request to fetch different pages of results.
+Code Implementation:
+1. Set Up React Router
+In your App.jsx file, import React Router components and set up routing:
 
-3. Add Next and Previous Buttons:
-Provide buttons for users to navigate between pages.
+js
+Copy
+import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom"; // Import router
+import { useDebounce } from "react-use";
+import hero from './assets/hero.png';
+import Search from "./Components/Search";
+import Spinner from "./Components/Spinner";
+import MovieCard from "./Components/MovieCard";
+import MovieDetails from "./Components/MovieDetails"; // Import MovieDetails component
+import { getTrendingMovies, updateSearchCount } from "./appwrite";
 
-Key Changes:
-Pagination State:
+const API_BASE_URL = "https://api.themoviedb.org/3";
+const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
+const API_OPTIONS = {
+  method: "GET",
+  headers: {
+    "Content-Type": "application/json",
+    "Authorization": `Bearer ${API_KEY}`,
+  },
+};
 
-currentPage: Tracks the current page.
+function App() {
+  const [searchTerm, setSearchTerm] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [moviesList, setMoviesList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [debounceSearchTerm, setDebounceSearchTerm] = useState('');
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [isTrendingLoading, setIsTrendingLoading] = useState(false);
+  const [trendingError, setTrendingError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [moviesPerPage] = useState(20);
 
-totalPages: Tracks the total number of pages (from API).
+  useDebounce(() => setDebounceSearchTerm(searchTerm), 500, [searchTerm]);
 
-moviesPerPage: Fixed number of movies per page (can be adjusted).
+  const fetchMovies = async (query = '', page = 1) => {
+    try {
+      setIsLoading(true);
+      setErrorMessage('');
 
-API Endpoint:
+      const endpoint = query
+        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}`
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${page}`;
 
-Modified to include page=${page} in both the search and popular movie queries to handle pagination.
+      const response = await fetch(endpoint, API_OPTIONS);
+      if (!response.ok) {
+        throw new Error('Error fetching movies');
+      }
 
-Pagination Controls:
+      const data = await response.json();
+      if (data.results.length === 0) {
+        setMoviesList([]);
+        setErrorMessage('No movies found. Please try another search.');
+        setIsLoading(false);
+        return;
+      }
 
-Added "Previous" and "Next" buttons for users to navigate between pages.
+      setMoviesList(data.results);
+      setTotalPages(data.total_pages);
 
-Disabled buttons when on the first or last page.
+      if (query && data.results.length > 0) {
+        await updateSearchCount(query, data.results[0]);
+      }
+    } catch (error) {
+      console.error(`Error fetching movies: ${error}`);
+      setErrorMessage(`Error fetching movies: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-Page Handling Logic:
+  const fetchTrendingMovies = async () => {
+    try {
+      setIsTrendingLoading(true);
+      setTrendingError('');
+      const movies = await getTrendingMovies();
+      setTrendingMovies(movies);
+    } catch (error) {
+      console.error(`Error fetching trending movies: ${error}`);
+      setTrendingError('Error fetching trending movies. Please try again later.');
+    } finally {
+      setIsTrendingLoading(false);
+    }
+  };
 
-handlePageChange function to change pages based on button clicks.
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      fetchMovies(debounceSearchTerm, page);
+    }
+  };
 
-Summary:
-With these changes, your app will now support pagination when displaying search results or popular movies, and users can navigate between pages using "Previous" and "Next" buttons.
+  useEffect(() => {
+    fetchMovies(debounceSearchTerm, currentPage);
+  }, [debounceSearchTerm, currentPage]);
+
+  useEffect(() => {
+    fetchTrendingMovies();
+  }, []);
+
+  return (
+    <Router>
+      <main>
+        <div className="pattern" />
+        <div className="wrapper">
+          <header>
+            <img src={hero} alt="Hero Banner" />
+            <h1>
+              Find <span className="text-gradient">Movies</span> You Will Enjoy Without A Hassle
+            </h1>
+            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          </header>
+
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <section className="all-movies">
+                  <h2>All Movies</h2>
+                  {isLoading ? (
+                    <Spinner />
+                  ) : errorMessage ? (
+                    <p className="text-red-500">{errorMessage}</p>
+                  ) : (
+                    <ul>
+                      {moviesList.map((movie) => (
+                        <MovieCard key={movie.id} movie={movie} />
+                      ))}
+                    </ul>
+                  )}
+                  {totalPages > 1 && (
+                    <div className="pagination">
+                      <button
+                        disabled={currentPage <= 1}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                      >
+                        Previous
+                      </button>
+                      <span>{`Page ${currentPage} of ${totalPages}`}</span>
+                      <button
+                        disabled={currentPage >= totalPages}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </section>
+              }
+            />
+            <Route
+              path="/movie/:id"
+              element={<MovieDetails />}
+            />
+          </Routes>
+        </div>
+      </main>
+    </Router>
+  );
+}
+
+export default App;
+2. Create the MovieDetails Component
+Now, create a new file MovieDetails.jsx inside the Components directory:
+
+js
+Copy
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
+
+const MovieDetails = () => {
+  const { id } = useParams(); // Get the movie ID from the URL
+  const [movieDetails, setMovieDetails] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState('');
+
+  const fetchMovieDetails = async () => {
+    try {
+      const response = await fetch(
+        `https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+      );
+      if (!response.ok) {
+        throw new Error('Error fetching movie details');
+      }
+      const data = await response.json();
+      setMovieDetails(data);
+    } catch (error) {
+      setErrorMessage(`Error fetching movie details: ${error.message}`);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchMovieDetails();
+  }, [id]);
+
+  if (isLoading) return <p>Loading...</p>;
+  if (errorMessage) return <p>{errorMessage}</p>;
+
+  return (
+    <div className="movie-details">
+      <h2>{movieDetails.title}</h2>
+      <p>{movieDetails.overview}</p>
+      <p><strong>Release Date:</strong> {movieDetails.release_date}</p>
+      <p><strong>Genres:</strong> {movieDetails.genres.map(genre => genre.name).join(', ')}</p>
+      <img src={`https://image.tmdb.org/t/p/w500/${movieDetails.poster_path}`} alt={movieDetails.title} />
+    </div>
+  );
+};
+
+export default MovieDetails;
+How It Works:
+React Router Setup: The Router component wraps the main app, and the Routes component defines different routes. The home page (/) displays the list of movies, while the movie details page (/movie/:id) displays the details of the selected movie.
+
+Movie Details Component: The MovieDetails component fetches and displays details for a movie based on its id (passed via the URL) using the useParams hook.
+
+MovieCard: You can add a link around the movie cards in the home page to navigate to the details page.
+
+Example of wrapping MovieCard with a Link:
+
+jsx
+Copy
+<Link to={`/movie/${movie.id}`}>
+  <MovieCard key={movie.id} movie={movie} />
+</Link>
+Now, clicking on a movie card will navigate to a details page that shows more information about the selected movie.
+
+
+
+when we tried accessing the movie details page we encountered an error of authorization error 
+
+The 401 Unauthorized error means your API request to TMDB is being rejected due to an invalid or missing API key. Here’s how to fix it:
+
+🔴 Problem Identified
+Invalid API Key Format
+
+You’re using a JWT token (eyJhbGciOiJIUzI1NiJ9...) instead of a TMDB API key (a 32-character string like abcd1234abcd1234abcd1234abcd1234).
+
+TMDB expects a v3 API key, not a JWT.
+
+Environment Variable Issue
+
+import.meta.env.VITE_TMDB_API_KEY is not loading the correct key.
+
+🟢 Solution
+1. Get a Valid TMDB API Key
+Go to TMDB API Settings and create a v3 API key (not a v4 access token).
+
+It should look like:
+
+Copy
+0123456789abcdef0123456789abcdef
+2. Update .env File
+In your project’s .env file, set the key:
+
+env
+Copy
+VITE_TMDB_API_KEY=0123456789abcdef0123456789abcdef
+Restart your dev server after changing .env.file.
+
+then we styled the movie details page.

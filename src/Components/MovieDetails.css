@@ -1,0 +1,232 @@
+/* CSS Variables for easy theming */
+:root {
+    --primary-color: rgb(149, 13, 247); /* Dark blue (TMDB brand color) */
+    --secondary-color: #01b4e4; /* Light blue */
+    --text-color: #050202;
+    --text-light: #f8f9fa;
+    --background: #f8f9fa;
+    --card-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    --border-radius: 8px;
+    --backdrop-overlay: rgb(149, 13, 247)
+  }
+
+    
+  /* Backdrop Header */
+  .movie-backdrop {
+    position: relative;
+    width: 100%;
+    height: 400px;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: flex-end;
+    margin-bottom: 2rem;
+  }
+  .movie-backdrop::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(to top, var(--backdrop-overlay), transparent);
+  }
+  
+  .movie-header-content {
+    position: relative;
+    z-index: 2;
+    padding: 2rem;
+    color: var(--text-light);
+    width: 100%;
+  }
+  
+  .movie-title {
+    font-size: 3rem;
+    margin: 0;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+  }
+  
+  /* Base styles */
+  .movie-details {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 1rem;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    color: var(--text-color);
+  }
+  
+  /* Loading and error states */
+  .loading,
+  .error {
+    text-align: center;
+    padding: 2rem;
+    font-size: 1.2rem;
+    color: var(--secondary-color);
+  }
+
+  .movie-backdrop.loading {
+    background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+  }
+  
+  @keyframes shimmer {
+    to { background-position: -200% 0; }
+  }
+  
+  .error {
+    color: #dc3545; /* Red for errors */
+  }
+  
+  /* Movie header section */
+  .movie-details h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    color: var(--primary-color);
+    border-bottom: 2px solid var(--secondary-color);
+    padding-bottom: 0.5rem;
+  }
+  
+  /* Movie poster and basic info grid */
+  .movie-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+  
+  @media (min-width: 768px) {
+    .movie-info {
+      flex-direction: row;
+    }
+  }
+  
+  /* Poster image */
+  .movie-poster {
+    flex: 0 0 300px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+  }
+  
+  .movie-poster img {
+    width: 100%;
+    height: auto;
+    display: block;
+  }
+  
+  /* Movie metadata */
+  .movie-meta {
+    flex: 1;
+  }
+  
+  .movie-meta p {
+    margin-bottom: 1rem;
+    line-height: 1.6;
+  }
+  
+  .movie-meta strong {
+    color: var(--primary-color);
+    font-weight: 600;
+  }
+  
+  /* Genres list */
+  .genres {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+  }
+  
+  .genre {
+    background-color: var(--secondary-color);
+    color: white;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+  }
+  
+  /* Overview section */
+  .overview {
+    background-color: white;
+    padding: 1.5rem;
+    border-radius: var(--border-radius);
+    box-shadow: var(--card-shadow);
+    margin-top: 2rem;
+  }
+  
+  /* Responsive adjustments */
+  @media (max-width: 768px) {
+    .movie-details h2 {
+      font-size: 2rem;
+    }
+    
+    .movie-poster {
+      flex: 0 0 100%;
+      margin-bottom: 1.5rem;
+    }
+  }
+
+  /* Add these new styles to your existing CSS */
+
+/* Star Ratings */
+.rating {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin: 1rem 0;
+  }
+  
+  .stars {
+    display: flex;
+    position: relative;
+  }
+  
+  .stars-background,
+  .stars-foreground {
+    display: flex;
+    gap: 2px;
+  }
+  
+  .stars-background {
+    color: #ddd; /* Empty star color */
+  }
+  
+  .stars-foreground {
+    position: absolute;
+    top: 0;
+    left: 0;
+    color: #ffc107; /* Gold star color */
+    overflow: hidden;
+    width: calc(var(--rating-percent) * 1%);
+  }
+  
+  .rating-value {
+    font-weight: bold;
+    color: var(--primary-color);
+  }
+  
+  /* Progress bar style (alternative) */
+  .rating-progress {
+    width: 100%;
+    height: 8px;
+    background: #ddd;
+    border-radius: 4px;
+    margin-top: 0.5rem;
+    overflow: hidden;
+  }
+  
+  .rating-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #ffc107, #ff8c00);
+    width: calc(var(--rating-percent) * 1%);
+  }
+
+
+
+
+
+
+  
+
+  

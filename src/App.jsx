@@ -1,20 +1,15 @@
 import React, { useState, useEffect } from "react";
+import { BrowserRouter as Router, Route, Routes, Link } from "react-router-dom"; // Import router
 import { useDebounce } from "react-use";
 import hero from './assets/hero.png';
 import Search from "./Components/Search";
 import Spinner from "./Components/Spinner";
 import MovieCard from "./Components/MovieCard";
+import MovieDetails from "./Components/MovieDetails"; // Import MovieDetails component
 import { getTrendingMovies, updateSearchCount } from "./appwrite";
 
-// API - Application Programming Interface - a set of rules that allows one software application to talk to another application.
-
-// Define the API base URL
 const API_BASE_URL = "https://api.themoviedb.org/3";
-
-// Define the API key
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
-
-// Define the API options
 const API_OPTIONS = {
   method: "GET",
   headers: {
@@ -24,24 +19,20 @@ const API_OPTIONS = {
 };
 
 function App() {
-  const [searchTerm, setSearchTerm] = useState(''); // Search term state
-  const [errorMessage, setErrorMessage] = useState(''); // Error message state
-  const [moviesList, setMoviesList] = useState([]); // Movies state
-  const [isLoading, setIsLoading] = useState(false); // Loading state
-  const [debounceSearchTerm, setDebounceSearchTerm] = useState(''); // Debounced search term
-  const [trendingMovies, setTrendingMovies] = useState([]); // Trending movies state
-  const [isTrendingLoading, setIsTrendingLoading] = useState(false); // Loading state for trending movies
-  const [trendingError, setTrendingError] = useState(''); // Error state for trending movies
+  const [searchTerm, setSearchTerm] = useState('');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [moviesList, setMoviesList] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [debounceSearchTerm, setDebounceSearchTerm] = useState('');
+  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [isTrendingLoading, setIsTrendingLoading] = useState(false);
+  const [trendingError, setTrendingError] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [moviesPerPage] = useState(36);
 
-  // Pagination states
-  const [currentPage, setCurrentPage] = useState(1); // Current page
-  const [totalPages, setTotalPages] = useState(1); // Total pages
-  const [moviesPerPage] = useState(20); // Number of movies per page
-
-  // Debounce hook for search term
   useDebounce(() => setDebounceSearchTerm(searchTerm), 500, [searchTerm]);
 
-  // Fetch movies based on search term and pagination
   const fetchMovies = async (query = '', page = 1) => {
     try {
       setIsLoading(true);
@@ -65,7 +56,7 @@ function App() {
       }
 
       setMoviesList(data.results);
-      setTotalPages(data.total_pages); // Set total pages for pagination
+      setTotalPages(data.total_pages);
 
       if (query && data.results.length > 0) {
         await updateSearchCount(query, data.results[0]);
@@ -78,12 +69,10 @@ function App() {
     }
   };
 
-  // Function to fetch trending movies
   const fetchTrendingMovies = async () => {
     try {
       setIsTrendingLoading(true);
       setTrendingError('');
-
       const movies = await getTrendingMovies();
       setTrendingMovies(movies);
     } catch (error) {
@@ -94,7 +83,6 @@ function App() {
     }
   };
 
-  // Handle page changes for pagination
   const handlePageChange = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
@@ -102,86 +90,75 @@ function App() {
     }
   };
 
-  // useEffect hook to fetch movies when the search term or page changes
   useEffect(() => {
     fetchMovies(debounceSearchTerm, currentPage);
   }, [debounceSearchTerm, currentPage]);
 
-  // useEffect hook to fetch trending movies when the component mounts
   useEffect(() => {
     fetchTrendingMovies();
   }, []);
 
   return (
-    <main>
-      <div className="pattern" />
-      <div className="wrapper">
-        <header>
-          <img src={hero} alt="Hero Banner" />
-          <h1>
-            Find <span className="text-gradient">Movies</span> You Will Enjoy Without A Hassle
-          </h1>
-          <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
-        </header>
+    <Router>
+      <main>
+        <div className="pattern" />
+        <div className="wrapper">
+          <header>
+            <img src={hero} alt="Hero Banner" />
+            <h1>
+              Find <span className="text-gradient">Movies</span> You Will Enjoy Without A Hassle
+            </h1>
+            <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
+          </header>
 
-        {/* Trending Movies Section */}
-        <section className="trending">
-          <h2>Trending Movies</h2>
-          {isTrendingLoading ? (
-            <Spinner />
-          ) : trendingError ? (
-            <p className="text-red-500">{trendingError}</p>
-          ) : (
-            <ul>
-              {trendingMovies.map((movie, index) => (
-                <li key={movie.id}>
-                  <p>{index + 1}</p>
-                  <img src={movie.poster_url} alt={movie.title} />
-                  <h3>{movie.title}</h3>
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-
-        {/* All Movies Section */}
-        <section className="all-movies">
-          <h2>All Movies</h2>
-          {isLoading ? (
-            <Spinner />
-          ) : errorMessage ? (
-            <p className="text-red-500">{errorMessage}</p>
-          ) : (
-            <ul>
-              {moviesList.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} />
-              ))}
-            </ul>
-          )}
-
-          {/* Pagination Controls */}
-          {totalPages > 1 && (
-            <div className="pagination">
-              <button
-                disabled={currentPage <= 1}
-                onClick={() => handlePageChange(currentPage - 1)}
-                className="pagination"
-              >
-                Previous
-              </button>
-              <span>{`Page ${currentPage} of ${totalPages}`}</span>
-              <button
-                disabled={currentPage >= totalPages}
-                onClick={() => handlePageChange(currentPage + 1)}
-                className="pagination"
-              >
-                Next
-              </button>
-            </div>
-          )}
-        </section>
-      </div>
-    </main>
+          <Routes>
+            <Route
+              path="/"
+              element={
+                <section className="all-movies">
+                  <h2>All Movies</h2>
+                  {isLoading ? (
+                    <Spinner />
+                  ) : errorMessage ? (
+                    <p className="text-red-500">{errorMessage}</p>
+                  ) : (
+                    <ul>
+                      {moviesList.map((movie) => (
+                        <Link to={`/movie/${movie.id}`} key={movie.id}>
+                        <MovieCard movie={movie} />
+                      </Link>
+                      
+                      ))}
+                    </ul>
+                  )}
+                  {totalPages > 1 && (
+                    <div className="pagination">
+                      <button
+                        disabled={currentPage <= 1}
+                        onClick={() => handlePageChange(currentPage - 1)}
+                      >
+                        Previous
+                      </button>
+                      <span>{`Page ${currentPage} of ${totalPages}`}</span>
+                      <button
+                        disabled={currentPage >= totalPages}
+                        onClick={() => handlePageChange(currentPage + 1)}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+                </section>
+              }
+            />
+            <Route
+              path="/movie/:id"
+              element={<MovieDetails />}
+            />
+          </Routes>
+        </div>
+      </main>
+    </Router>
   );
 }
 
