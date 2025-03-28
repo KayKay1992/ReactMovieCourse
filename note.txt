@@ -1,182 +1,32 @@
-Now lets Show the Trending list of movies using appwrite.
+Adding error handling and loading effect to the trending movie section.
 
-we need to create another appwrite function to be able to fetch top movies from database. thiss is done in appwrite.js.
+To implement a loading effect and proper error handling for the trending movies section, we need to follow these steps:
 
-explaining the movie trending function in app.js.
+Loading State for Trending Movies: We'll use the isLoading state to show a loading spinner while fetching the trending movies.
 
-In this code, the **trending movie fetching functionality** is implemented in the `fetchTrendingMovies` function. Let’s break it down step by step:
+Error Handling for Trending Movies: We'll add an errorMessage state to handle and display any errors that occur while fetching the trending movies.
 
-### 1. **State to Store Trending Movies**
+Conditional Rendering: We'll conditionally render either the loading spinner, the error message, or the list of trending movies.
 
-```javascript
-const [trendingMovies, setTrendingMovies] = useState([]);
-```
+Key Changes:
+Loading State for Trending Movies:
 
-- `trendingMovies`: This state variable holds the list of trending movies that will be fetched and displayed on the page.
+I added a new state isTrendingLoading that controls whether the trending movies section is loading or not.
 
-### 2. **Fetching Trending Movies**
+When isTrendingLoading is true, the Spinner component is shown.
 
-```javascript
-const fetchTrendingMovies = async () => {
-  try {
-    const movies = await getTrendingMovies(); // Fetch trending movies from Appwrite
-    setTrendingMovies(movies); // Store the fetched trending movies in the state
-  } catch (error) {
-    console.error(`Error fetching trending movies: ${error}`); // Log any error
-  } 
-};
-```
+Error Handling for Trending Movies:
 
-- The `fetchTrendingMovies` function is an **asynchronous function** that calls `getTrendingMovies()` to fetch the list of trending movies.
-- It then updates the `trendingMovies` state with the movies retrieved from `getTrendingMovies()`.
-- In case of an error (e.g., a network issue), it logs the error message to the console.
+I added an error state trendingError to handle and display errors related to fetching trending movies.
 
-### 3. **`getTrendingMovies()` Function**
+If trendingError has a value, it will display the error message on the UI.
 
-The `getTrendingMovies()` function is imported from `appwrite`. It likely interacts with the Appwrite database or another API to get a list of trending movies. The implementation of `getTrendingMovies()` isn't shown in the code you provided, but it's assumed to be a function that fetches the data from Appwrite or a similar backend service.
+Fetching Trending Movies:
 
-```javascript
-import { getTrendingMovies } from "./appwrite";
-```
+The fetchTrendingMovies function has been updated to handle loading and errors while fetching trending movies. It now uses setIsTrendingLoading and setTrendingError to handle the state changes.
 
-### 4. **Triggering the Trending Movie Fetching**
+Conditional Rendering:
 
-The `fetchTrendingMovies` function is called in the `useEffect` hook when the component first mounts:
+For both trending movies and all movies sections, I added conditional rendering based on the loading state (isTrendingLoading, isLoading) and error messages (trendingError, errorMessage).
 
-```javascript
-useEffect(() => {
-  fetchTrendingMovies(); // Fetch trending movies on component mount
-}, []);
-```
-
-- This `useEffect` hook is executed only once when the component mounts (because the dependency array is empty `[]`).
-- It triggers the `fetchTrendingMovies` function to fetch the trending movies and populate the `trendingMovies` state.
-
-### 5. **Rendering the Trending Movies**
-
-The code below renders the trending movies in the UI:
-
-```javascript
-{trendingMovies.length > 0 && (
-  <section className="trending">
-    <h2>Trending Movies</h2>
-    <ul>
-      {trendingMovies.map((movie, index) => (
-        <li key={movie.id}>
-          <p>{index + 1}</p>
-          <img
-            src={movie.poster_url}
-            alt={movie.title}
-          />
-          <h3>{movie.title}</h3>
-        </li>
-      ))}
-    </ul>
-  </section>
-)}
-```
-
-- This checks if there are any `trendingMovies` in the state (i.e., `trendingMovies.length > 0`).
-- If there are trending movies, it renders them in a `section` with a heading "Trending Movies."
-- It maps over the `trendingMovies` array and renders each movie's position (`index + 1`), poster image (`movie.poster_url`), and title (`movie.title`).
-  
-The result is that the app will display a list of trending movies fetched when the component mounts. Each movie will have its poster, title, and rank based on its position in the array (e.g., "1", "2", "3", etc.).
-
-### 6. **Summary of Trending Movies Fetching Flow**
-
-- **Initial Load:** When the app first loads, the `useEffect` hook fetches the trending movies by calling `fetchTrendingMovies()`.
-- **Fetching:** `fetchTrendingMovies` uses the `getTrendingMovies()` function to fetch the list of trending movies.
-- **State Update:** Once the movies are fetched, the `trendingMovies` state is updated, and the UI re-renders to display the list of trending movies.
-- **Error Handling:** If an error occurs while fetching the movies, it is logged in the console.
-
-### 7. **Other Relevant Parts of the Code**
-
-- **Debounced Search Term:** There's another `useEffect` that triggers the movie fetch (`fetchMovies`) whenever the user changes the search term. This is unrelated to the trending movies, but it's important for fetching movies based on user search input.
-  
-```javascript
-useEffect(() => {
-  fetchMovies(debounceSearchTerm); // Fetch movies based on the debounced search term
-}, [debounceSearchTerm]); 
-```
-
-### Conclusion
-
-In summary, the trending movies functionality is handled by the `fetchTrendingMovies` function, which calls `getTrendingMovies` to retrieve a list of trending movies and updates the `trendingMovies` state. The `useEffect` hook ensures that the trending movies are fetched when the component mounts, and they are rendered in a dedicated section of the UI.
-
-EXPLAINING THE GETTRENDING MOVIES FUNCTINON IN APPWRITE.JS.
-
-In the code you provided, the `getTrendingMovies` function is designed to fetch the trending movies from a database (likely Appwrite in this case). Let's break it down and explain the implementation:
-
-### 1. **Function Declaration**
-
-```javascript
-export const getTrendingMovies = async () => {
-```
-
-- This function is an **asynchronous function** (indicated by `async`), meaning it will return a promise, and you can use `await` inside it to wait for asynchronous operations to complete.
-
-### 2. **Fetching Data from Appwrite Database**
-
-```javascript
-const results = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
-  Query.limit(10),
-  Query.orderDesc('count'),
-]);
-```
-
-- **`database.listDocuments(DATABASE_ID, COLLECTION_ID, [...])`**:
-  - This line calls the `listDocuments` method from the **Appwrite SDK** to query documents in a specific collection of a database.
-  - `DATABASE_ID` and `COLLECTION_ID` are variables representing the IDs of the database and collection you're querying in the Appwrite service.
-  
-- **Query Parameters**:
-  - `Query.limit(10)`: Limits the number of documents returned to 10. This is useful for fetching a small subset of results, which are the top 10 trending movies in this case.
-  - `Query.orderDesc('count')`: Orders the documents in descending order based on the `count` field. This assumes that you have a field `count` in your documents that tracks how many times a movie has been searched for (or viewed, depending on your use case). This allows you to fetch the most popular or trending movies.
-
-### 3. **Returning the Results**
-
-```javascript
-return results.documents;
-```
-
-- After executing the query, the result is stored in the `results` object. The `results.documents` contains the documents returned from the database. This array is then returned by the `getTrendingMovies` function.
-  
-  - Each item in `results.documents` represents a movie document, which would contain fields such as `id`, `title`, `count`, `poster_url`, etc. These fields would be used later in the application (as seen in the component where you're rendering the trending movies).
-
-### 4. **Error Handling**
-
-```javascript
-} catch (error) {
-  console.log(error);
-}
-```
-
-- **Error handling**: If there's any error during the execution of the database query (e.g., network issue, wrong database ID, etc.), the error will be caught and logged to the console.
-  
-### Summary of `getTrendingMovies`
-
-- The function fetches the top 10 trending movies from the database, based on the `count` field in descending order.
-- It uses Appwrite's `listDocuments` method to query the database and get the top 10 documents.
-- The results are returned as an array of movie documents, which are assumed to have properties like `id`, `title`, `count`, and `poster_url`.
-- The function handles any errors that may occur during the query.
-
-### Usage in the App
-
-In your `App.js` file, this function is used in the `fetchTrendingMovies` function:
-
-```javascript
-const fetchTrendingMovies = async () => {
-  try {
-    const movies = await getTrendingMovies(); // Fetch trending movies
-    setTrendingMovies(movies); // Update state with trending movies
-  } catch (error) {
-    console.error(`Error fetching trending movies: ${error}`);
-  } 
-};
-```
-
-- This function calls `getTrendingMovies` to fetch the top 10 trending movies from the Appwrite database and then updates the `trendingMovies` state with the returned movies. These movies are then displayed in the UI.
-
-### Considerations
-
-- Ensure that your Appwrite database collection contains the `count` field (or whichever field you're using to track the popularity of the movies). This is necessary for the `Query.orderDesc('count')` to work as expected.
-- Make sure your Appwrite API endpoint is correctly set up with the necessary permissions to access the database and fetch documents.
+With these changes, your app will display a loading spinner while fetching the data and show error messages when something goes wrong. It will also show the list of trending movies once they are successfully fetched.
