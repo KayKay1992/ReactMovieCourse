@@ -1,130 +1,182 @@
-setting up appwrite and implementing appwrite in our project which we we use to get trending movies.
+Now lets Show the Trending list of movies using appwrite.
 
-we will use backend as a service which one of them is appwrite, there are others like firebase.
+we need to create another appwrite function to be able to fetch top movies from database. thiss is done in appwrite.js.
 
-create and account with appwrite.
-then create a project and copy the project id to your .env file.
-Then we set up a platform for the project.
-we will use web ...then give it a name. then in hostname use * so that you can call it from anywhere.
-then click next.
+explaining the movie trending function in app.js.
 
-Then copy the installation command and install appwrite.
-Then click next, keep clicking next until you see go to the dashboard button then click on it.
+In this code, the **trending movie fetching functionality** is implemented in the `fetchTrendingMovies` function. Let’s break it down step by step:
 
-on the side, you will see database click on it then you will see a button for creating a database click on it and create a database make sure u copy the database id.
+### 1. **State to Store Trending Movies**
 
-Then we create a new collection within that database, we also copy the id and register it in the new .env file.
-
-Then we create an attribute for each metrics, we craeted attributes of string, integer and url data types, for attributes of searchTerm, poster_url, movie_id and count.
-
-Then head over to settings and turn on the permission for any.
-
-
-
-
-///////////////EXPLAINING THE APPWRITE.JS FILE/////////
-
-This code is for interacting with Appwrite, a backend-as-a-service platform, using its SDK to manage search data and track how often a certain search term is queried by users. Here’s a breakdown of the code:
-
-### Imports
-```js
-import { Client, Databases, ID, Query } from "appwrite";
+```javascript
+const [trendingMovies, setTrendingMovies] = useState([]);
 ```
-This imports the necessary modules from the Appwrite SDK:
-- `Client`: To interact with the Appwrite server.
-- `Databases`: To access the Appwrite databases and perform actions like listing and updating documents.
-- `ID`: To generate unique IDs for new documents.
-- `Query`: To build queries for filtering documents in the database.
 
-### Constants
-```js
-const PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID;
-const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
-const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
+- `trendingMovies`: This state variable holds the list of trending movies that will be fetched and displayed on the page.
+
+### 2. **Fetching Trending Movies**
+
+```javascript
+const fetchTrendingMovies = async () => {
+  try {
+    const movies = await getTrendingMovies(); // Fetch trending movies from Appwrite
+    setTrendingMovies(movies); // Store the fetched trending movies in the state
+  } catch (error) {
+    console.error(`Error fetching trending movies: ${error}`); // Log any error
+  } 
+};
 ```
-These constants fetch environment variables to configure the Appwrite SDK. The environment variables are expected to be defined elsewhere in the project, like in `.env` files:
-- `PROJECT_ID`: The unique ID of your Appwrite project.
-- `DATABASE_ID`: The ID of the database within your Appwrite project.
-- `COLLECTION_ID`: The ID of the collection where the search data will be stored.
 
-### Client Setup
-```js
-const client = new Client();
-client.setEndpoint(`https://cloud.appwrite.io/v1`);
-client.setProject(PROJECT_ID);
+- The `fetchTrendingMovies` function is an **asynchronous function** that calls `getTrendingMovies()` to fetch the list of trending movies.
+- It then updates the `trendingMovies` state with the movies retrieved from `getTrendingMovies()`.
+- In case of an error (e.g., a network issue), it logs the error message to the console.
+
+### 3. **`getTrendingMovies()` Function**
+
+The `getTrendingMovies()` function is imported from `appwrite`. It likely interacts with the Appwrite database or another API to get a list of trending movies. The implementation of `getTrendingMovies()` isn't shown in the code you provided, but it's assumed to be a function that fetches the data from Appwrite or a similar backend service.
+
+```javascript
+import { getTrendingMovies } from "./appwrite";
 ```
-Here, a new instance of `Client` is created and configured with:
-- The Appwrite API endpoint (`https://cloud.appwrite.io/v1`).
-- The project ID (retrieved from the environment).
 
-### Database Setup
-```js
-const database = new Databases(client);
+### 4. **Triggering the Trending Movie Fetching**
+
+The `fetchTrendingMovies` function is called in the `useEffect` hook when the component first mounts:
+
+```javascript
+useEffect(() => {
+  fetchTrendingMovies(); // Fetch trending movies on component mount
+}, []);
 ```
-A new instance of `Databases` is created using the `client` to interact with the Appwrite database service.
 
-### Function to Update Search Count
-```js
-export const updateSearchCount = async (searchTerm, movie) => {
+- This `useEffect` hook is executed only once when the component mounts (because the dependency array is empty `[]`).
+- It triggers the `fetchTrendingMovies` function to fetch the trending movies and populate the `trendingMovies` state.
+
+### 5. **Rendering the Trending Movies**
+
+The code below renders the trending movies in the UI:
+
+```javascript
+{trendingMovies.length > 0 && (
+  <section className="trending">
+    <h2>Trending Movies</h2>
+    <ul>
+      {trendingMovies.map((movie, index) => (
+        <li key={movie.id}>
+          <p>{index + 1}</p>
+          <img
+            src={movie.poster_url}
+            alt={movie.title}
+          />
+          <h3>{movie.title}</h3>
+        </li>
+      ))}
+    </ul>
+  </section>
+)}
 ```
-This function `updateSearchCount` is defined to handle search term updates. It accepts two parameters:
-- `searchTerm`: The term that the user searched for.
-- `movie`: A movie object that contains the details of the searched movie.
 
-#### Try-Catch Block
-The function is wrapped in a `try-catch` block to handle any errors that may occur during the database interaction.
+- This checks if there are any `trendingMovies` in the state (i.e., `trendingMovies.length > 0`).
+- If there are trending movies, it renders them in a `section` with a heading "Trending Movies."
+- It maps over the `trendingMovies` array and renders each movie's position (`index + 1`), poster image (`movie.poster_url`), and title (`movie.title`).
+  
+The result is that the app will display a list of trending movies fetched when the component mounts. Each movie will have its poster, title, and rank based on its position in the array (e.g., "1", "2", "3", etc.).
 
-#### Query Existing Search Term
-```js
-const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [Query.equal('searchTerm', searchTerm)]);
+### 6. **Summary of Trending Movies Fetching Flow**
+
+- **Initial Load:** When the app first loads, the `useEffect` hook fetches the trending movies by calling `fetchTrendingMovies()`.
+- **Fetching:** `fetchTrendingMovies` uses the `getTrendingMovies()` function to fetch the list of trending movies.
+- **State Update:** Once the movies are fetched, the `trendingMovies` state is updated, and the UI re-renders to display the list of trending movies.
+- **Error Handling:** If an error occurs while fetching the movies, it is logged in the console.
+
+### 7. **Other Relevant Parts of the Code**
+
+- **Debounced Search Term:** There's another `useEffect` that triggers the movie fetch (`fetchMovies`) whenever the user changes the search term. This is unrelated to the trending movies, but it's important for fetching movies based on user search input.
+  
+```javascript
+useEffect(() => {
+  fetchMovies(debounceSearchTerm); // Fetch movies based on the debounced search term
+}, [debounceSearchTerm]); 
 ```
-This line uses the `listDocuments` method to query the collection. It checks whether the `searchTerm` already exists in the database. The query filters for documents where the `searchTerm` field matches the given `searchTerm`.
 
-#### Check for Existing Document
-```js
-if(result.documents.length > 0) {
-    const doc = result.documents[0];
-    await database.updateDocument(DATABASE_ID, COLLECTION_ID, doc.$id,  {
-        count: doc.count + 1
-    });
+### Conclusion
+
+In summary, the trending movies functionality is handled by the `fetchTrendingMovies` function, which calls `getTrendingMovies` to retrieve a list of trending movies and updates the `trendingMovies` state. The `useEffect` hook ensures that the trending movies are fetched when the component mounts, and they are rendered in a dedicated section of the UI.
+
+EXPLAINING THE GETTRENDING MOVIES FUNCTINON IN APPWRITE.JS.
+
+In the code you provided, the `getTrendingMovies` function is designed to fetch the trending movies from a database (likely Appwrite in this case). Let's break it down and explain the implementation:
+
+### 1. **Function Declaration**
+
+```javascript
+export const getTrendingMovies = async () => {
 ```
-- If the search term already exists (i.e., `result.documents.length > 0`), the first document is retrieved.
-- The document’s `count` field is then incremented by 1 using `updateDocument`, which updates the document with the new count.
 
-#### Create New Document
-```js
-} else {
-    await database.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
-        searchTerm,
-        count: 1,
-        movie_id: movie.id,
-        poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`
-    });
+- This function is an **asynchronous function** (indicated by `async`), meaning it will return a promise, and you can use `await` inside it to wait for asynchronous operations to complete.
+
+### 2. **Fetching Data from Appwrite Database**
+
+```javascript
+const results = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
+  Query.limit(10),
+  Query.orderDesc('count'),
+]);
+```
+
+- **`database.listDocuments(DATABASE_ID, COLLECTION_ID, [...])`**:
+  - This line calls the `listDocuments` method from the **Appwrite SDK** to query documents in a specific collection of a database.
+  - `DATABASE_ID` and `COLLECTION_ID` are variables representing the IDs of the database and collection you're querying in the Appwrite service.
+  
+- **Query Parameters**:
+  - `Query.limit(10)`: Limits the number of documents returned to 10. This is useful for fetching a small subset of results, which are the top 10 trending movies in this case.
+  - `Query.orderDesc('count')`: Orders the documents in descending order based on the `count` field. This assumes that you have a field `count` in your documents that tracks how many times a movie has been searched for (or viewed, depending on your use case). This allows you to fetch the most popular or trending movies.
+
+### 3. **Returning the Results**
+
+```javascript
+return results.documents;
+```
+
+- After executing the query, the result is stored in the `results` object. The `results.documents` contains the documents returned from the database. This array is then returned by the `getTrendingMovies` function.
+  
+  - Each item in `results.documents` represents a movie document, which would contain fields such as `id`, `title`, `count`, `poster_url`, etc. These fields would be used later in the application (as seen in the component where you're rendering the trending movies).
+
+### 4. **Error Handling**
+
+```javascript
+} catch (error) {
+  console.log(error);
 }
 ```
-- If the search term does not exist (i.e., no document was found), a new document is created with the following fields:
-  - `searchTerm`: The term that was searched.
-  - `count`: Set to 1, since it's the first time the term was searched.
-  - `movie_id`: The ID of the movie being searched (from the `movie` object).
-  - `poster_url`: The URL for the movie’s poster image (constructed using the `movie.poster_path`).
 
-### Error Handling
-```js
-} catch(error) {
-    console.log(error);
-}
+- **Error handling**: If there's any error during the execution of the database query (e.g., network issue, wrong database ID, etc.), the error will be caught and logged to the console.
+  
+### Summary of `getTrendingMovies`
+
+- The function fetches the top 10 trending movies from the database, based on the `count` field in descending order.
+- It uses Appwrite's `listDocuments` method to query the database and get the top 10 documents.
+- The results are returned as an array of movie documents, which are assumed to have properties like `id`, `title`, `count`, and `poster_url`.
+- The function handles any errors that may occur during the query.
+
+### Usage in the App
+
+In your `App.js` file, this function is used in the `fetchTrendingMovies` function:
+
+```javascript
+const fetchTrendingMovies = async () => {
+  try {
+    const movies = await getTrendingMovies(); // Fetch trending movies
+    setTrendingMovies(movies); // Update state with trending movies
+  } catch (error) {
+    console.error(`Error fetching trending movies: ${error}`);
+  } 
+};
 ```
-If there’s any error during the database operations, it is logged to the console.
 
-### Summary
-- The `updateSearchCount` function tracks how many times a particular search term has been queried by users.
-- If the search term exists, it increments the count.
-- If the search term doesn't exist, it creates a new entry with an initial count of 1.
-- The function also associates a specific movie's data (like ID and poster URL) with the search term.
+- This function calls `getTrendingMovies` to fetch the top 10 trending movies from the Appwrite database and then updates the `trendingMovies` state with the returned movies. These movies are then displayed in the UI.
 
-This is useful for analytics purposes or tracking popular search terms.
+### Considerations
 
-/////HOW APPWRITE IS INTEGRATED IN APP.JS//
-
-How Appwrite is Integrated:
-When the user searches for a movie, the updateSearchCount function from appwrite.js is called. This function checks if the search term already exists in the database, and if it does, it increments the search count. If not, it creates a new document in Appwrite to track the search term.
+- Ensure that your Appwrite database collection contains the `count` field (or whichever field you're using to track the popularity of the movies). This is necessary for the `Query.orderDesc('count')` to work as expected.
+- Make sure your Appwrite API endpoint is correctly set up with the necessary permissions to access the database and fetch documents.

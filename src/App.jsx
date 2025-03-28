@@ -4,7 +4,7 @@ import hero from './assets/hero.png';
 import Search from "./Components/Search";
 import Spinner from "./Components/Spinner";
 import MovieCard from "./Components/MovieCard";
-import { updateSearchCount } from "./appwrite";
+import { getTrendingMovies, updateSearchCount } from "./appwrite";
 
 // API - Application Programming Interface - a set of rules that allows one software application to talk to another application.
 
@@ -30,6 +30,12 @@ function App() {
   const [isLoading, setIsLoading] = useState(false); // Loading state
   // Debounce search term to prevent unnecessary API calls
   const [debounceSearchTerm, setDebounceSearchTerm] = useState('');
+  //trending movies state
+  const [trendingMovies, setTrendingMovies] = useState([]);
+
+  
+
+
 
   //then we call a debounce hook and pass a function to it
   //this waits for the user to stop typing for 500ms before it starts searching.
@@ -81,10 +87,29 @@ function App() {
     }
   };
 
+  // function to load trending movies
+  const fetchTrendingMovies = async () => {
+    try {
+      const movies = await getTrendingMovies();
+      setTrendingMovies(movies);
+    } catch (error) {
+      console.error(`Error fetching trending movies: ${error}`);
+     
+    } 
+  };
+
+  // Function to handle search input change
+
   // useEffect hook to fetch movies when the search term changes
   useEffect(() => {
     fetchMovies(debounceSearchTerm);
   }, [debounceSearchTerm]); // Trigger whenever searchTerm changes
+  // useEffect hook to fetch trending movies when the component mounts
+  useEffect(() => {
+    fetchTrendingMovies();
+  }, []);
+
+
 
   return (
     <main>
@@ -97,9 +122,27 @@ function App() {
           </h1>
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
+        {trendingMovies.length > 0 &&(
+          <section className="trending">
+            <h2>Trending Movies</h2>
+            <ul>
+              {trendingMovies.map((movie, index) => (
+                <li key={movie.id}>
+                  <p>{index + 1}</p>
+                  <img
+                    src={movie.poster_url}
+                    alt={movie.title}
+                  />
+                  <h3>{movie.title}</h3>
+                </li>
+              ))}
+            </ul>
+         
+          </section>
+        )}
 
         <section className="all-movies">
-          <h2 className="mt-40">All Movies</h2>
+          <h2 >All Movies</h2>
 
           {/* Conditional Rendering */}
           {isLoading ? (

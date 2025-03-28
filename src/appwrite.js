@@ -39,3 +39,30 @@ export const updateSearchCount = async (searchTerm, movie) => {
 
 
 };
+
+//implementing the function that will fetch the top 10 most searched movies.
+
+// export const getTopSearchedMovies = async () => {
+//   try{
+//     const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [Query.limit(10), Query.orderDesc('count')])
+//     return result.documents;
+//   }catch(error){
+//     console.log(error)
+//   }
+// };
+
+//implementing the function that will fetch the trending movies.
+
+export const getTrendingMovies = async () => {
+  try{
+    const results = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [
+      Query.limit(10),
+      Query.orderDesc('count'),
+     
+    ])
+   ;
+    return results.documents;
+  }catch(error){
+    console.log(error)
+  }
+};
