@@ -7,6 +7,7 @@ import Spinner from "./Components/Spinner";
 import MovieCard from "./Components/MovieCard";
 import MovieDetails from "./Components/MovieDetails"; // Import MovieDetails component
 import { getTrendingMovies, updateSearchCount } from "./appwrite";
+import MoviePlayer from "./Components/WatchProviders";
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -155,7 +156,7 @@ function App() {
               path="/movie/:id"
               element={<MovieDetails />}
             />
-          </Routes>
+          </Routes>       
         </div>
       </main>
     </Router>

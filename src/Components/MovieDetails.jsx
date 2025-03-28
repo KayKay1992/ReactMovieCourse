@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import "./MovieDetails.css";
+import WatchProviders from "./WatchProviders";
 
 const MovieDetails = () => {
   const { id } = useParams();
@@ -8,59 +9,61 @@ const MovieDetails = () => {
   const [movieDetails, setMovieDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
-  //trailer states
   const [trailerKey, setTrailerKey] = useState(null);
-const [isTrailerLoading, setIsTrailerLoading] = useState(false);
+  const [isTrailerLoading, setIsTrailerLoading] = useState(false);
+  const [watchProviders, setWatchProviders] = useState(null);
 
+  const fetchWithCORS = async (url) => {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          'Accept': 'application/json',
+          'Content-Type': 'application/json'
+        }
+      });
+      if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+      return await response.json();
+    } catch (error) {
+      console.error("Fetch error:", error);
+      throw error;
+    }
+  };
 
-//fetch trailer logic
-const fetchTrailer = async (movieId) => {
-  setIsTrailerLoading(true);
-  try {
-    const response = await fetch(
-      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
-    );
-    const data = await response.json();
-    const trailer = data.results.find(
-      (video) => video.type === "Trailer" && video.site === "YouTube"
-    );
-    setTrailerKey(trailer?.key);
-  } catch (error) {
-    console.error("Error fetching trailer:", error);
-  } finally {
-    setIsTrailerLoading(false);
-  }
-};
+  const fetchTrailer = async (movieId) => {
+    setIsTrailerLoading(true);
+    try {
+      const data = await fetchWithCORS(
+        `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+      );
+      const trailer = data.results.find(
+        (video) => video.type === "Trailer" && video.site === "YouTube"
+      );
+      setTrailerKey(trailer?.key);
+    } catch (error) {
+      console.error("Trailer fetch failed:", error);
+    } finally {
+      setIsTrailerLoading(false);
+    }
+  };
 
-useEffect(() => {
-  if (id) {
-    fetchTrailer(id);
-  }
-}, [id]);
-
-  // Helper function to format release date
-  const formatReleaseDate = (dateString) => {
-    if (!dateString) return "Unknown";
-    const options = { year: "numeric", month: "long", day: "numeric" };
-    return new Date(dateString).toLocaleDateString("en-US", options);
+  const fetchWatchProviders = async () => {
+    try {
+      const data = await fetchWithCORS(
+        `https://api.themoviedb.org/3/movie/${id}/watch/providers?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+      );
+      setWatchProviders(data.results?.US || null);
+    } catch (error) {
+      console.error("Watch providers fetch failed:", error);
+    }
   };
 
   const fetchMovieDetails = async () => {
     try {
       setIsLoading(true);
       setErrorMessage("");
-      const response = await fetch(
-        `https://api.themoviedb.org/3/movie/${id}?api_key=${
-          import.meta.env.VITE_TMDB_API_KEY
-        }`
+      const data = await fetchWithCORS(
+        `https://api.themoviedb.org/3/movie/${id}?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
       );
-      if (!response.ok) {
-        throw new Error(`Failed to fetch (HTTP ${response.status})`);
-      }
-      const data = await response.json();
-      setMovieDetails(data);
-      //   const data = await response.json();
-      // console.log("Genres data:", data.release_date); // Check if genres exist
       setMovieDetails(data);
     } catch (error) {
       setErrorMessage(`Error: ${error.message}. Please check the movie ID.`);
@@ -70,8 +73,18 @@ useEffect(() => {
   };
 
   useEffect(() => {
-    if (id) fetchMovieDetails();
+    if (id) {
+      fetchMovieDetails();
+      fetchTrailer(id);
+      fetchWatchProviders();
+    }
   }, [id]);
+
+  const formatReleaseDate = (dateString) => {
+    if (!dateString) return "Unknown";
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
+  };
 
   const renderStarRating = (voteAverage) => {
     const MAX_STARS = 5;
@@ -130,17 +143,14 @@ useEffect(() => {
           />
         </div>
         <div className="movie-meta">
-          {movieDetails.vote_average &&
-            renderStarRating(movieDetails.vote_average)}
+          {movieDetails.vote_average && renderStarRating(movieDetails.vote_average)}
 
           <p>
             <strong>Release Date:</strong>{" "}
             {formatReleaseDate(movieDetails.release_date)}
           </p>
 
-          <p>
-            <strong>Genres:</strong>
-          </p>
+          <p><strong>Genres:</strong></p>
           <div className="genres">
             {movieDetails.genres?.length > 0 ? (
               movieDetails.genres.map((genre) => (
@@ -151,41 +161,57 @@ useEffect(() => {
             ) : (
               <span className="genre">No genres listed</span>
             )}
-            
           </div>
-                  {/* Trailer Section */}
-    <section className="trailer-section">
-      <h2>Trailer</h2>
-      {isTrailerLoading ? (
-        <div className="spinner"></div>
-      ) : trailerKey ? (
-        <div className="video-container">
-          <iframe
-            width="100%"
-            height="500"
-            src={`https://www.youtube.com/embed/${trailerKey}`}
-            title={`${movieDetails.title} Trailer`}
-            frameBorder="0"
-            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            allowFullScreen
-          ></iframe>
+          
+          {/* Corrected Trailer Section */}
+          <section className="trailer-section">
+            <h2>Trailer</h2>
+            {isTrailerLoading ? (
+              <div className="spinner"></div>
+            ) : trailerKey ? (
+              <div className="video-container">
+                <iframe
+                  src={`https://www.youtube-nocookie.com/embed/${trailerKey}?autoplay=0&modestbranding=1&rel=0&enablejsapi=0`}
+                  title={`${movieDetails.title} Trailer`}
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                  loading="lazy"
+                  sandbox="allow-same-origin allow-scripts allow-popups allow-presentation"
+                ></iframe>
+              </div>
+            ) : (
+              <p>No trailer available</p>
+            )}
+          </section>
         </div>
-      ) : (
-        <p>No trailer available</p>
-      )}
-    </section>
-        </div>
- 
       </div>
 
       <div className="overview">
         <h3>Overview</h3>
         <p>{movieDetails.overview || "No overview available."}</p>
       </div>
-        {/* Back button added here */}
+
+      <div className="action-buttons">
         <button onClick={() => navigate("/")} className="back-button">
-        ← Back to Home
-      </button>
+          ← Back to Home
+        </button>
+        
+        {watchProviders && (
+          <div className="watch-options">
+            <h2>Watch Options</h2>
+            <WatchProviders providers={watchProviders} movieId={id} />
+            <a
+              href={`https://www.themoviedb.org/movie/${id}/watch`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="tmdb-link"
+            >
+              View all streaming options
+            </a>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
