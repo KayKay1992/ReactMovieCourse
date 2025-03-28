@@ -1,54 +1,130 @@
-Optimizing the search functionality using debouncing.
+setting up appwrite and implementing appwrite in our project which we we use to get trending movies.
 
-In this code, **debouncing** is used to optimize the search functionality by preventing excessive API calls while the user types in the search input.
+we will use backend as a service which one of them is appwrite, there are others like firebase.
 
-Let's break it down step by step to explain how debouncing works in this example:
+create and account with appwrite.
+then create a project and copy the project id to your .env file.
+Then we set up a platform for the project.
+we will use web ...then give it a name. then in hostname use * so that you can call it from anywhere.
+then click next.
 
-### 1. **Debouncing in Context**:
-   - **Debouncing** is a technique where you delay a function (in this case, the search query) from being executed until after a specified amount of time has passed since the last time it was invoked. This helps to avoid making an API request for every single keystroke.
-   
-### 2. **The `useDebounce` Hook**:
-   - `useDebounce` is a custom hook from the `react-use` library. It’s used to delay or debounce changes to a value before executing a function.
-   - In this code, the `useDebounce` hook is used to delay the setting of the actual search term (`debounceSearchTerm`) until the user stops typing for 500 milliseconds.
+Then copy the installation command and install appwrite.
+Then click next, keep clicking next until you see go to the dashboard button then click on it.
 
-### 3. **How it Works in the Code**:
-   ```js
-   // Debounce search term to prevent unnecessary API calls
-   const [debounceSearchTerm, setDebounceSearchTerm] = useState('');
-   
-   // useDebounce waits 500ms after the user stops typing to update the debounceSearchTerm
-   useDebounce(() => setDebounceSearchTerm(searchTerm), 500, [searchTerm]);
-   ```
-   - The **`useDebounce`** hook is watching the `searchTerm` state. Every time `searchTerm` changes (as the user types), `useDebounce` waits for 500 milliseconds (half a second) before calling the function inside it (`setDebounceSearchTerm`).
-   - This ensures that the search term will only update after the user stops typing for 500ms. This prevents unnecessary API calls on every keystroke.
+on the side, you will see database click on it then you will see a button for creating a database click on it and create a database make sure u copy the database id.
 
-### 4. **Why Use Debouncing?**:
-   - Without debouncing, every character typed would trigger an API call (which can be very inefficient, especially when querying an external API like The Movie Database API). This would slow down the app and potentially lead to rate-limiting issues from the API if too many requests are sent in a short time.
-   - By debouncing, the app waits for the user to stop typing before sending the request. This results in fewer, more relevant requests and a faster, more responsive user experience.
+Then we create a new collection within that database, we also copy the id and register it in the new .env file.
 
-### 5. **Fetching Movies Based on Debounced Search Term**:
-   - When the `debounceSearchTerm` state changes (which is updated after the debounce period), the `useEffect` hook is triggered:
-   ```js
-   useEffect(() => {
-     fetchMovies(debounceSearchTerm);
-   }, [debounceSearchTerm]);
-   ```
-   - This will call the `fetchMovies` function only when the debounced search term (`debounceSearchTerm`) changes. The `fetchMovies` function fetches data from the API using the debounced search term, which ensures that the API request is sent only after the user has stopped typing for a while.
+Then we create an attribute for each metrics, we craeted attributes of string, integer and url data types, for attributes of searchTerm, poster_url, movie_id and count.
 
-### 6. **What Happens on Typing**:
-   - As the user types into the search bar (`Search` component), the `searchTerm` state is updated immediately.
-   - The `useDebounce` hook waits for 500ms after the last change to the `searchTerm` before setting the `debounceSearchTerm` state.
-   - The `useEffect` hook then triggers and calls the `fetchMovies` function with the new debounced value.
+Then head over to settings and turn on the permission for any.
 
-### 7. **API Call Optimization**:
-   - **Without debouncing**, every change in `searchTerm` would result in a new API request. This can lead to slow performance or excessive API usage.
-   - **With debouncing**, only after the user stops typing for 500ms will the API request be sent. This significantly reduces the number of requests made during the typing process and improves the performance of the application.
 
-### 8. **Result**:
-   - The user can type their search query without triggering an API call for every keystroke, leading to fewer requests and a smoother user experience.
 
-### Summary:
-- **Debouncing** ensures that only **one API call** is made after the user has stopped typing for **500ms**. This optimization avoids unnecessary requests and enhances the performance of the app, especially when interacting with APIs like The Movie Database API.
 
-***********we install a packag that will help use debounce the package is npm i react-use
-thrn import useDebounce from react-use
+///////////////EXPLAINING THE APPWRITE.JS FILE/////////
+
+This code is for interacting with Appwrite, a backend-as-a-service platform, using its SDK to manage search data and track how often a certain search term is queried by users. Here’s a breakdown of the code:
+
+### Imports
+```js
+import { Client, Databases, ID, Query } from "appwrite";
+```
+This imports the necessary modules from the Appwrite SDK:
+- `Client`: To interact with the Appwrite server.
+- `Databases`: To access the Appwrite databases and perform actions like listing and updating documents.
+- `ID`: To generate unique IDs for new documents.
+- `Query`: To build queries for filtering documents in the database.
+
+### Constants
+```js
+const PROJECT_ID = import.meta.env.VITE_APPWRITE_PROJECT_ID;
+const DATABASE_ID = import.meta.env.VITE_APPWRITE_DATABASE_ID;
+const COLLECTION_ID = import.meta.env.VITE_APPWRITE_COLLECTION_ID;
+```
+These constants fetch environment variables to configure the Appwrite SDK. The environment variables are expected to be defined elsewhere in the project, like in `.env` files:
+- `PROJECT_ID`: The unique ID of your Appwrite project.
+- `DATABASE_ID`: The ID of the database within your Appwrite project.
+- `COLLECTION_ID`: The ID of the collection where the search data will be stored.
+
+### Client Setup
+```js
+const client = new Client();
+client.setEndpoint(`https://cloud.appwrite.io/v1`);
+client.setProject(PROJECT_ID);
+```
+Here, a new instance of `Client` is created and configured with:
+- The Appwrite API endpoint (`https://cloud.appwrite.io/v1`).
+- The project ID (retrieved from the environment).
+
+### Database Setup
+```js
+const database = new Databases(client);
+```
+A new instance of `Databases` is created using the `client` to interact with the Appwrite database service.
+
+### Function to Update Search Count
+```js
+export const updateSearchCount = async (searchTerm, movie) => {
+```
+This function `updateSearchCount` is defined to handle search term updates. It accepts two parameters:
+- `searchTerm`: The term that the user searched for.
+- `movie`: A movie object that contains the details of the searched movie.
+
+#### Try-Catch Block
+The function is wrapped in a `try-catch` block to handle any errors that may occur during the database interaction.
+
+#### Query Existing Search Term
+```js
+const result = await database.listDocuments(DATABASE_ID, COLLECTION_ID, [Query.equal('searchTerm', searchTerm)]);
+```
+This line uses the `listDocuments` method to query the collection. It checks whether the `searchTerm` already exists in the database. The query filters for documents where the `searchTerm` field matches the given `searchTerm`.
+
+#### Check for Existing Document
+```js
+if(result.documents.length > 0) {
+    const doc = result.documents[0];
+    await database.updateDocument(DATABASE_ID, COLLECTION_ID, doc.$id,  {
+        count: doc.count + 1
+    });
+```
+- If the search term already exists (i.e., `result.documents.length > 0`), the first document is retrieved.
+- The document’s `count` field is then incremented by 1 using `updateDocument`, which updates the document with the new count.
+
+#### Create New Document
+```js
+} else {
+    await database.createDocument(DATABASE_ID, COLLECTION_ID, ID.unique(), {
+        searchTerm,
+        count: 1,
+        movie_id: movie.id,
+        poster_url: `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+    });
+}
+```
+- If the search term does not exist (i.e., no document was found), a new document is created with the following fields:
+  - `searchTerm`: The term that was searched.
+  - `count`: Set to 1, since it's the first time the term was searched.
+  - `movie_id`: The ID of the movie being searched (from the `movie` object).
+  - `poster_url`: The URL for the movie’s poster image (constructed using the `movie.poster_path`).
+
+### Error Handling
+```js
+} catch(error) {
+    console.log(error);
+}
+```
+If there’s any error during the database operations, it is logged to the console.
+
+### Summary
+- The `updateSearchCount` function tracks how many times a particular search term has been queried by users.
+- If the search term exists, it increments the count.
+- If the search term doesn't exist, it creates a new entry with an initial count of 1.
+- The function also associates a specific movie's data (like ID and poster URL) with the search term.
+
+This is useful for analytics purposes or tracking popular search terms.
+
+/////HOW APPWRITE IS INTEGRATED IN APP.JS//
+
+How Appwrite is Integrated:
+When the user searches for a movie, the updateSearchCount function from appwrite.js is called. This function checks if the search term already exists in the database, and if it does, it increments the search count. If not, it creates a new document in Appwrite to track the search term.

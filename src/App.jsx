@@ -4,6 +4,7 @@ import hero from './assets/hero.png';
 import Search from "./Components/Search";
 import Spinner from "./Components/Spinner";
 import MovieCard from "./Components/MovieCard";
+import { updateSearchCount } from "./appwrite";
 
 // API - Application Programming Interface - a set of rules that allows one software application to talk to another application.
 
@@ -68,6 +69,10 @@ function App() {
 
       // Set the movies state with the received data
       setMoviesList(data.results);
+      if(query && data.results.length > 0) {
+        // Update the search count
+        await updateSearchCount(query, data.results[0])
+      }
     } catch (error) {
       console.error(`Error fetching movies: ${error}`);
       setErrorMessage(`Error fetching movies: ${error.message}`);
