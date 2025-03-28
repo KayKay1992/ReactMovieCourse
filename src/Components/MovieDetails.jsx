@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import "./MovieDetails.css";
 
 const MovieDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const [movieDetails, setMovieDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
@@ -11,8 +12,8 @@ const MovieDetails = () => {
   // Helper function to format release date
   const formatReleaseDate = (dateString) => {
     if (!dateString) return "Unknown";
-    const options = { year: 'numeric', month: 'long', day: 'numeric' };
-    return new Date(dateString).toLocaleDateString('en-US', options);
+    const options = { year: "numeric", month: "long", day: "numeric" };
+    return new Date(dateString).toLocaleDateString("en-US", options);
   };
 
   const fetchMovieDetails = async () => {
@@ -29,9 +30,9 @@ const MovieDetails = () => {
       }
       const data = await response.json();
       setMovieDetails(data);
-    //   const data = await response.json();
-// console.log("Genres data:", data.release_date); // Check if genres exist
-setMovieDetails(data);
+      //   const data = await response.json();
+      // console.log("Genres data:", data.release_date); // Check if genres exist
+      setMovieDetails(data);
     } catch (error) {
       setErrorMessage(`Error: ${error.message}. Please check the movie ID.`);
     } finally {
@@ -104,10 +105,13 @@ setMovieDetails(data);
             renderStarRating(movieDetails.vote_average)}
 
           <p>
-            <strong>Release Date:</strong> {formatReleaseDate(movieDetails.release_date)}
+            <strong>Release Date:</strong>{" "}
+            {formatReleaseDate(movieDetails.release_date)}
           </p>
-          
-          <p><strong>Genres:</strong></p>
+
+          <p>
+            <strong>Genres:</strong>
+          </p>
           <div className="genres">
             {movieDetails.genres?.length > 0 ? (
               movieDetails.genres.map((genre) => (
@@ -126,6 +130,10 @@ setMovieDetails(data);
         <h3>Overview</h3>
         <p>{movieDetails.overview || "No overview available."}</p>
       </div>
+        {/* Back button added here */}
+        <button onClick={() => navigate("/")} className="back-button">
+        ← Back to Home
+      </button>
     </div>
   );
 };
