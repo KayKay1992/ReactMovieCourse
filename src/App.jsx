@@ -28,41 +28,35 @@ function App() {
   const [errorMessage, setErrorMessage] = useState(''); // Error message state
   const [moviesList, setMoviesList] = useState([]); // Movies state
   const [isLoading, setIsLoading] = useState(false); // Loading state
-  // Debounce search term to prevent unnecessary API calls
-  const [debounceSearchTerm, setDebounceSearchTerm] = useState('');
-  // Trending movies state
-  const [trendingMovies, setTrendingMovies] = useState([]);
+  const [debounceSearchTerm, setDebounceSearchTerm] = useState(''); // Debounced search term
+  const [trendingMovies, setTrendingMovies] = useState([]); // Trending movies state
   const [isTrendingLoading, setIsTrendingLoading] = useState(false); // Loading state for trending movies
   const [trendingError, setTrendingError] = useState(''); // Error state for trending movies
 
-  // Debounce hook to wait for the user to stop typing for 500ms before it starts searching
+  // Pagination states
+  const [currentPage, setCurrentPage] = useState(1); // Current page
+  const [totalPages, setTotalPages] = useState(1); // Total pages
+  const [moviesPerPage] = useState(20); // Number of movies per page
+
+  // Debounce hook for search term
   useDebounce(() => setDebounceSearchTerm(searchTerm), 500, [searchTerm]);
 
-  // Function to fetch movies based on the search term
-  const fetchMovies = async (query = '') => {
+  // Fetch movies based on search term and pagination
+  const fetchMovies = async (query = '', page = 1) => {
     try {
-      // Show loading state
       setIsLoading(true);
-      // Clear the error message
       setErrorMessage('');
 
-      // Construct the endpoint based on the query (search term or popular movies)
       const endpoint = query
-        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}`
-        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc`;
+        ? `${API_BASE_URL}/search/movie?query=${encodeURIComponent(query)}&page=${page}`
+        : `${API_BASE_URL}/discover/movie?sort_by=popularity.desc&page=${page}`;
 
-      // Fetch data from the API
       const response = await fetch(endpoint, API_OPTIONS);
-
-      // Check if the response is successful
       if (!response.ok) {
         throw new Error('Error fetching movies');
       }
 
-      // Parse the response as JSON
       const data = await response.json();
-
-      // Check if no results are returned
       if (data.results.length === 0) {
         setMoviesList([]);
         setErrorMessage('No movies found. Please try another search.');
@@ -70,43 +64,53 @@ function App() {
         return;
       }
 
-      // Set the movies state with the received data
       setMoviesList(data.results);
+      setTotalPages(data.total_pages); // Set total pages for pagination
+
       if (query && data.results.length > 0) {
-        // Update the search count
         await updateSearchCount(query, data.results[0]);
       }
     } catch (error) {
       console.error(`Error fetching movies: ${error}`);
       setErrorMessage(`Error fetching movies: ${error.message}`);
     } finally {
-      setIsLoading(false); // End loading state
+      setIsLoading(false);
     }
   };
 
-  // Function to load trending movies
+  // Function to fetch trending movies
   const fetchTrendingMovies = async () => {
-    setIsTrendingLoading(true); // Start loading state for trending movies
     try {
+      setIsTrendingLoading(true);
+      setTrendingError('');
+
       const movies = await getTrendingMovies();
       setTrendingMovies(movies);
     } catch (error) {
       console.error(`Error fetching trending movies: ${error}`);
-      setTrendingError(`Error fetching trending movies: ${error.message}`);
+      setTrendingError('Error fetching trending movies. Please try again later.');
     } finally {
-      setIsTrendingLoading(false); // End loading state for trending movies
+      setIsTrendingLoading(false);
     }
   };
 
-  // useEffect hook to fetch movies when the search term changes
+  // Handle page changes for pagination
+  const handlePageChange = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      fetchMovies(debounceSearchTerm, page);
+    }
+  };
+
+  // useEffect hook to fetch movies when the search term or page changes
   useEffect(() => {
-    fetchMovies(debounceSearchTerm);
-  }, [debounceSearchTerm]); // Trigger whenever searchTerm changes
+    fetchMovies(debounceSearchTerm, currentPage);
+  }, [debounceSearchTerm, currentPage]);
 
   // useEffect hook to fetch trending movies when the component mounts
   useEffect(() => {
     fetchTrendingMovies();
-  }, []); // Only trigger once when the component mounts
+  }, []);
 
   return (
     <main>
@@ -120,40 +124,60 @@ function App() {
           <Search searchTerm={searchTerm} setSearchTerm={setSearchTerm} />
         </header>
 
-        {/* Conditional Rendering for Trending Movies */}
-        {isTrendingLoading ? (
-          <Spinner /> // Show loading spinner while fetching trending movies
-        ) : trendingError ? (
-          <p className="text-red-500">{trendingError}</p> // Show error message if there's an error fetching trending movies
-        ) : trendingMovies.length > 0 && (
-          <section className="trending">
-            <h2>Trending Movies</h2>
+        {/* Trending Movies Section */}
+        <section className="trending">
+          <h2>Trending Movies</h2>
+          {isTrendingLoading ? (
+            <Spinner />
+          ) : trendingError ? (
+            <p className="text-red-500">{trendingError}</p>
+          ) : (
             <ul>
               {trendingMovies.map((movie, index) => (
-                <li key={movie.id || index}> {/* Ensure unique "key" for each item */}
+                <li key={movie.id}>
                   <p>{index + 1}</p>
                   <img src={movie.poster_url} alt={movie.title} />
                   <h3>{movie.title}</h3>
                 </li>
               ))}
             </ul>
-          </section>
-        )}
+          )}
+        </section>
 
+        {/* All Movies Section */}
         <section className="all-movies">
           <h2>All Movies</h2>
-
-          {/* Conditional Rendering for All Movies */}
           {isLoading ? (
-            <Spinner /> // Show loading spinner while fetching movies
+            <Spinner />
           ) : errorMessage ? (
-            <p className="text-red-500">{errorMessage}</p> // Show error message if there's an error fetching movies
+            <p className="text-red-500">{errorMessage}</p>
           ) : (
             <ul>
               {moviesList.map((movie) => (
-                <MovieCard key={movie.id} movie={movie} /> // Ensure unique "key" for each movie card
+                <MovieCard key={movie.id} movie={movie} />
               ))}
             </ul>
+          )}
+
+          {/* Pagination Controls */}
+          {totalPages > 1 && (
+            <div className="pagination">
+              <button
+                disabled={currentPage <= 1}
+                onClick={() => handlePageChange(currentPage - 1)}
+                className="pagination"
+              >
+                Previous
+              </button>
+              <span>{`Page ${currentPage} of ${totalPages}`}</span>
+              <button
+                disabled={currentPage >= totalPages}
+                onClick={() => handlePageChange(currentPage + 1)}
+                className="pagination"
+              >
+                Next
+              </button>
+            </div>
           )}
         </section>
       </div>

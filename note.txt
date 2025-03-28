@@ -1,32 +1,44 @@
-Adding error handling and loading effect to the trending movie section.
+Adding Pagination 
 
-To implement a loading effect and proper error handling for the trending movies section, we need to follow these steps:
+To implement pagination for the movie list in your code, you’ll need to adjust your API calls so that you can load more movies in chunks (or pages) rather than loading all movies at once. Typically, this is done by adding a page parameter to the API request and adjusting the state for the current page and total pages.
 
-Loading State for Trending Movies: We'll use the isLoading state to show a loading spinner while fetching the trending movies.
+Here’s a step-by-step implementation:
 
-Error Handling for Trending Movies: We'll add an errorMessage state to handle and display any errors that occur while fetching the trending movies.
+1. Add State for Pagination:
+Track the current page.
 
-Conditional Rendering: We'll conditionally render either the loading spinner, the error message, or the list of trending movies.
+Track the total number of pages (if the API provides this information).
+
+Track whether there are more pages to load.
+
+2. Modify the API call to include pagination:
+Use the page parameter in the API request to fetch different pages of results.
+
+3. Add Next and Previous Buttons:
+Provide buttons for users to navigate between pages.
 
 Key Changes:
-Loading State for Trending Movies:
+Pagination State:
 
-I added a new state isTrendingLoading that controls whether the trending movies section is loading or not.
+currentPage: Tracks the current page.
 
-When isTrendingLoading is true, the Spinner component is shown.
+totalPages: Tracks the total number of pages (from API).
 
-Error Handling for Trending Movies:
+moviesPerPage: Fixed number of movies per page (can be adjusted).
 
-I added an error state trendingError to handle and display errors related to fetching trending movies.
+API Endpoint:
 
-If trendingError has a value, it will display the error message on the UI.
+Modified to include page=${page} in both the search and popular movie queries to handle pagination.
 
-Fetching Trending Movies:
+Pagination Controls:
 
-The fetchTrendingMovies function has been updated to handle loading and errors while fetching trending movies. It now uses setIsTrendingLoading and setTrendingError to handle the state changes.
+Added "Previous" and "Next" buttons for users to navigate between pages.
 
-Conditional Rendering:
+Disabled buttons when on the first or last page.
 
-For both trending movies and all movies sections, I added conditional rendering based on the loading state (isTrendingLoading, isLoading) and error messages (trendingError, errorMessage).
+Page Handling Logic:
 
-With these changes, your app will display a loading spinner while fetching the data and show error messages when something goes wrong. It will also show the list of trending movies once they are successfully fetched.
+handlePageChange function to change pages based on button clicks.
+
+Summary:
+With these changes, your app will now support pagination when displaying search results or popular movies, and users can navigate between pages using "Previous" and "Next" buttons.
