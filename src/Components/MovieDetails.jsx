@@ -8,6 +8,35 @@ const MovieDetails = () => {
   const [movieDetails, setMovieDetails] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
+  //trailer states
+  const [trailerKey, setTrailerKey] = useState(null);
+const [isTrailerLoading, setIsTrailerLoading] = useState(false);
+
+
+//fetch trailer logic
+const fetchTrailer = async (movieId) => {
+  setIsTrailerLoading(true);
+  try {
+    const response = await fetch(
+      `https://api.themoviedb.org/3/movie/${movieId}/videos?api_key=${import.meta.env.VITE_TMDB_API_KEY}`
+    );
+    const data = await response.json();
+    const trailer = data.results.find(
+      (video) => video.type === "Trailer" && video.site === "YouTube"
+    );
+    setTrailerKey(trailer?.key);
+  } catch (error) {
+    console.error("Error fetching trailer:", error);
+  } finally {
+    setIsTrailerLoading(false);
+  }
+};
+
+useEffect(() => {
+  if (id) {
+    fetchTrailer(id);
+  }
+}, [id]);
 
   // Helper function to format release date
   const formatReleaseDate = (dateString) => {
@@ -122,8 +151,31 @@ const MovieDetails = () => {
             ) : (
               <span className="genre">No genres listed</span>
             )}
+            
           </div>
+                  {/* Trailer Section */}
+    <section className="trailer-section">
+      <h2>Trailer</h2>
+      {isTrailerLoading ? (
+        <div className="spinner"></div>
+      ) : trailerKey ? (
+        <div className="video-container">
+          <iframe
+            width="100%"
+            height="500"
+            src={`https://www.youtube.com/embed/${trailerKey}`}
+            title={`${movieDetails.title} Trailer`}
+            frameBorder="0"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            allowFullScreen
+          ></iframe>
         </div>
+      ) : (
+        <p>No trailer available</p>
+      )}
+    </section>
+        </div>
+ 
       </div>
 
       <div className="overview">
