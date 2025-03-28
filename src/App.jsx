@@ -6,8 +6,7 @@ import Search from "./Components/Search";
 import Spinner from "./Components/Spinner";
 import MovieCard from "./Components/MovieCard";
 import MovieDetails from "./Components/MovieDetails"; 
-import { getTrendingMovies, updateSearchCount } from "./appwrite"; // Assuming getTrendingMovies fetches trending movies
-import MoviePlayer from "./Components/WatchProviders";
+import { updateSearchCount } from "./appwrite"; // Assuming updateSearchCount tracks searches
 
 const API_BASE_URL = "https://api.themoviedb.org/3";
 const API_KEY = import.meta.env.VITE_TMDB_API_KEY;
@@ -15,7 +14,6 @@ const API_OPTIONS = {
   method: "GET",
   headers: {
     "Content-Type": "application/json",
-    // "Authorization": `Bearer ${API_KEY}`,
   },
 };
 
@@ -30,9 +28,9 @@ function App() {
   const [trendingError, setTrendingError] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
-  const [moviesPerPage] = useState(36);
+  const [moviesPerPage] = useState(36); // You can adjust this based on your preference.
 
-  // Debouncing the search term
+  // Debouncing the search term to avoid sending requests too quickly
   useDebounce(() => setDebounceSearchTerm(searchTerm), 500, [searchTerm]);
 
   // Fetch Movies Based on Search Term or Trending
@@ -42,8 +40,8 @@ function App() {
       setErrorMessage('');
 
       const endpoint = query
-      ? `${API_BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
-      : `${API_BASE_URL}/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&page=${page}`;
+        ? `${API_BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
+        : `${API_BASE_URL}/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&page=${page}`;
 
       const response = await fetch(endpoint, API_OPTIONS);
       if (!response.ok) {
@@ -73,13 +71,14 @@ function App() {
   };
 
   // Fetch Trending Movies
-  const fetchTrendingMovies = async () => {
+  const fetchTrendingMovies = async (page = 1) => {
     try {
       setIsTrendingLoading(true);
       setTrendingError('');
-     const response = await fetch(`${API_BASE_URL}/trending/movie/day?api_key=${API_KEY}`);
+      const response = await fetch(`${API_BASE_URL}/trending/movie/day?api_key=${API_KEY}&page=${page}`);
       const data = await response.json();
       setTrendingMovies(data.results);
+      setTotalPages(data.total_pages); // Ensure total pages for trending
     } catch (error) {
       console.error(`Error fetching trending movies: ${error}`);
       setTrendingError('Error fetching trending movies. Please try again later.');
@@ -88,20 +87,28 @@ function App() {
     }
   };
 
-  // Handle Page Change
-  const handlePageChange = (page) => {
+  // Handle Page Change (Pagination) for Trending
+  const handlePageChangeTrending = (page) => {
     if (page >= 1 && page <= totalPages) {
       setCurrentPage(page);
-      fetchMovies(debounceSearchTerm, page);
+      fetchTrendingMovies(page); // Fetch trending movies for the new page
     }
   };
 
-  // Fetch Movies and Trending Movies on Initial Render
+  // Handle Page Change (Pagination) for Search
+  const handlePageChangeSearch = (page) => {
+    if (page >= 1 && page <= totalPages) {
+      setCurrentPage(page);
+      fetchMovies(debounceSearchTerm, page); // Fetch search results for the new page
+    }
+  };
+
+  // Fetch Movies and Trending Movies on Initial Render or Search Term Change
   useEffect(() => {
     if (debounceSearchTerm) {
       fetchMovies(debounceSearchTerm, currentPage);
     } else {
-      fetchTrendingMovies();
+      fetchTrendingMovies(currentPage);
     }
   }, [debounceSearchTerm, currentPage]);
 
@@ -137,18 +144,41 @@ function App() {
                       ))}
                     </ul>
                   )}
+
                   {totalPages > 1 && !debounceSearchTerm && (
                     <div className="pagination">
                       <button
+                        className="pagination-button"
                         disabled={currentPage <= 1}
-                        onClick={() => handlePageChange(currentPage - 1)}
+                        onClick={() => handlePageChangeTrending(currentPage - 1)}
                       >
                         Previous
                       </button>
                       <span>{`Page ${currentPage} of ${totalPages}`}</span>
                       <button
+                        className="pagination-button"
                         disabled={currentPage >= totalPages}
-                        onClick={() => handlePageChange(currentPage + 1)}
+                        onClick={() => handlePageChangeTrending(currentPage + 1)}
+                      >
+                        Next
+                      </button>
+                    </div>
+                  )}
+
+                  {debounceSearchTerm && totalPages > 1 && (
+                    <div className="pagination">
+                      <button
+                        className="pagination-button"
+                        disabled={currentPage <= 1}
+                        onClick={() => handlePageChangeSearch(currentPage - 1)}
+                      >
+                        Previous
+                      </button>
+                      <span>{`Page ${currentPage} of ${totalPages}`}</span>
+                      <button
+                        className="pagination-button"
+                        disabled={currentPage >= totalPages}
+                        onClick={() => handlePageChangeSearch(currentPage + 1)}
                       >
                         Next
                       </button>

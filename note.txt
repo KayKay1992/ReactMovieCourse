@@ -1,58 +1,37 @@
-fixing eror for searching and rendering my trending movies.
+pagination fixed
 
-The 401 authorization error you're encountering is likely due to an issue with how you're passing the API key to the TMDB API. Let me help you fix this.
+If the pagination buttons are not showing up in the UI, there are a few things we can check and update to ensure everything works properly.
 
-### Issues in Your Code:
+Here’s a checklist and the modifications to ensure pagination buttons display and function correctly:
 
-1. **Inconsistent API Key Usage**: You're using both `Authorization: Bearer` header and `api_key` query parameter in different places.
-2. **TMDB API Requirements**: TMDB API v3 typically expects the API key as a query parameter, not as a Bearer token.
+1. CSS Styling for Pagination
+First, ensure that the pagination buttons have appropriate styles so that they are visible. Add some basic styling for the pagination buttons to make them stand out.
 
-### Here's how to fix it:
+2. Ensure Correct Page Calculation
+Ensure that the page navigation logic (currentPage and totalPages) is being set correctly when new data is fetched.
 
-1. **Update your API_OPTIONS**:
-```javascript
-const API_OPTIONS = {
-  method: "GET",
-  headers: {
-    "Content-Type": "application/json",
-    // Remove the Authorization header
-  },
-};
-```
+3. Update the JSX Layout
+Add the pagination buttons and ensure they are properly rendered below the movie list.
 
-2. **Modify your fetch calls** to include the API key as a query parameter:
+To ensure the pagination appears for both trending movies and search results, you need to make a few adjustments to the logic where the pagination buttons are conditionally rendered. Specifically, you should make sure that pagination is displayed for both the search term results and the trending movies by ensuring the totalPages is set and that the pagination buttons are rendered appropriately for both cases.
 
-```javascript
-// In fetchMovies:
-const endpoint = query
-  ? `${API_BASE_URL}/search/movie?api_key=${API_KEY}&query=${encodeURIComponent(query)}&page=${page}`
-  : `${API_BASE_URL}/discover/movie?api_key=${API_KEY}&sort_by=popularity.desc&page=${page}`;
+Key Updates:
+Pagination Logic: Display pagination buttons whether you're viewing search results or trending movies.
 
-// In fetchTrendingMovies:
-const response = await fetch(`${API_BASE_URL}/trending/movie/day?api_key=${API_KEY}`);
-```
+Pagination Display: Ensure totalPages is always set correctly for both the search and trending data.
 
-### Additional Recommendations:
+Here is the updated code with the pagination buttons showing for both cases:
 
-1. **Verify your API_KEY**:
-   - Make sure `VITE_TMDB_API_KEY` is properly set in your `.env` file
-   - The .env file should be in your project root
-   - The .env file should contain: `VITE_TMDB_API_KEY=your_api_key_here`
+To implement proper pagination functionality on the trending movies page—where clicking on the "Next" button takes you to the next page and clicking on the "Previous" button goes back—you will need to adjust how you fetch and manage the data for the trending movies as the user navigates through the pages.
 
-2. **Error Handling**:
-   - Add more detailed error handling to see the exact error response from the API:
-   ```javascript
-   if (!response.ok) {
-     const errorData = await response.json();
-     console.error('API Error:', errorData);
-     throw new Error(errorData.status_message || 'Error fetching movies');
-   }
-   ```
+We can modify the logic slightly to ensure that the pagination for trending movies is properly handled with separate state for page tracking, and we also need to trigger a fetch call to get the new page data when the user clicks on the pagination buttons.
 
-3. **Rate Limiting**:
-   - TMDB has rate limits, so if you're making too many requests quickly, you might get 401 errors.
+Here's how we can achieve that:
 
-4. **Check API Key Permissions**:
-   - Ensure your TMDB API key has the correct permissions for the endpoints you're accessing.
+Key Steps:
+Track the current page for trending movies separately.
 
-The key change is that TMDB expects the API key as a query parameter (`api_key=YOUR_KEY`) rather than as a Bearer token in the Authorization header. This is the most common reason for 401 errors with the TMDB API.
+Update the page when clicking "Previous" or "Next" on the pagination buttons.
+
+Fetch new data based on the updated page for trending movies.
+
